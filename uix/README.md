@@ -7,7 +7,6 @@
 |**Generation Platform**<br>SAP Business Application Studio|
 |**Template Used**<br>simple|
 |**Service Type**<br>OData Url|
-|**Service URL**<br>/sap/opu/odata/sap/ZPRASANNA_V2_002_SRV/|
 |**Module Name**<br>uix|
 |**Application Title**<br>Product Entry|
 |**Namespace**<br>com.victora.cmc|
@@ -19,7 +18,7 @@
 
 ## uix
 
-An Offline MTA application
+An Customer Duplicate Finder MTA application
 
 ### Starting the generated app
 

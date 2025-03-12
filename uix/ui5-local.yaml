@@ -18,10 +18,6 @@ server:
       afterMiddleware: compression
       configuration:
         ignoreCertError: false # If set to true, certificate errors will be ignored. E.g. self-signed certificates will be accepted
-        backend:
-          - path: /sap
-            url: http://mylearning.com:8020
-            destination: AxiumSAPS4
     - name: fiori-tools-preview
       afterMiddleware: fiori-tools-proxy
       configuration:

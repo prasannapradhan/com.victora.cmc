@@ -72,20 +72,20 @@
       },
       "routes": [
         {
-          "name": "ProductListing",
-          "pattern": "ProductListing",
+          "name": "CustomerListing",
+          "pattern": "CustomerListing",
           "target": [
-            "TargetProductListing"
+            "TargetcustomerListing"
           ]
         }
       ],
       "targets": {
-        "TargetProductListing": {
+        "TargetcustomerListing": {
           "viewType": "XML",
           "transition": "slide",
           "clearControlAggregation": false,
-          "viewId": "ProductListing",
-          "viewName": "ProductListing"
+          "viewId": "CustomerListing",
+          "viewName": "CustomerListing"
         }
       }
     },

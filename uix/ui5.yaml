@@ -15,10 +15,6 @@ server:
             - /resources
             - /test-resources
           url: https://ui5.sap.com
-        backend:
-          - path: /sap
-            url: http://mylearning.com:8020
-            destination: AxiumSAPS4
     - name: fiori-tools-preview
       afterMiddleware: fiori-tools-proxy
       configuration:
