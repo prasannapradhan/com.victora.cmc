@@ -1,0 +1,128 @@
+<mvc:View
+    controllerName="com.victora.cmc.uix.controller.ProductListing"
+    displayBlock="true"
+    height="100%"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core"
+>
+    <Page
+        id="productListingPage"
+        title="{i18n>productListingTitle}"
+        visible="true"
+    >
+        <customHeader>
+            <Bar>
+                 <contentLeft>
+                    <Button
+                        text="Sync"
+                        type="Emphasized"
+                        press="syncProducts"
+                        class="dangerButton"
+                    />
+                </contentLeft>
+                <contentRight>
+                     <Button
+                        text="Refresh"
+                        type="Emphasized"
+                        press="reloadProducts"
+                    />
+                    <Button
+                        text="Create New"
+                        type="Emphasized"
+                        press="showProductCreate"
+                    />
+                </contentRight>
+            </Bar>
+        </customHeader>
+       
+        <List
+            enableBusyIndicator="true"
+            headerText="Products"
+            growing="false"
+            items="{path: 'productsModel>/'}"
+            mode="Delete"
+		    delete="handleProductDelete"
+        >
+            <StandardListItem
+                title="{productsModel>Name}"
+                description="{productsModel>Description}"
+                adaptTitleSize="true"
+            >
+                <customData>
+                    <core:CustomData 
+                        key="color" 
+                        core:require="{
+                            formatter: 'com/victora/cmc/uix/model/formatter'
+                        }"
+                        value="{path: 'productsModel>Status', formatter: 'formatter.getProductListingBackgroundClass'}" 
+                        writeToDom="true"/>
+                </customData>
+                
+            </StandardListItem>
+        </List>
+    </Page>
+
+    <Page
+        id="productCreatePage"
+        title="{i18n>productCreateTitle}"
+        visible="false"
+    >
+        <customHeader>
+            <Bar>
+                <contentRight>
+                    <Button
+                        text="Save"
+                        type="Emphasized"
+                        press="saveNewProduct"
+                    />
+                    <Button
+                        text="Cancel"
+                        press="showProductListing"
+                    />
+                </contentRight>
+            </Bar>
+        </customHeader>
+         <Panel
+            headerText="Product Creation"
+            visible="true"
+            expanded="true"
+            width="100%"
+            accessibleRole="Region"
+            height="100%"
+        >
+            <content>
+                <FlexBox
+                    height="auto"
+                    alignItems="Center"
+                    justifyContent="Center"
+                >
+                    <l:VerticalLayout>
+                        <Label
+                            text="Name"
+                            width="auto"
+                            class="sapUiTinyMarginTopBottom"
+                        />
+                        <Input
+                            class="sapUiTinyMarginBottom"
+                            width="auto"
+                            value="{product>/Name}"
+                        />
+                        <Label
+                            text="Description"
+                            class="sapUiTinyMarginTopBottom"
+                        />
+                        <TextArea
+                            class="sapUiTinyMarginBottom"
+                            width="auto"
+                            value="{product>/Description}"
+                            rows="4"
+                        />
+                    </l:VerticalLayout>
+                </FlexBox>
+            </content>
+        </Panel>
+   </Page>
+
+</mvc:View>

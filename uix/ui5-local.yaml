@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+
+specVersion: "3.1"
+metadata:
+  name: com.victora.cmc.uix
+type: application
+framework:
+  name: SAPUI5
+  version: 1.128.1
+  libraries:
+    - name: sap.m
+    - name: sap.ui.core
+    - name: sap.ushell
+    - name: themelib_sap_horizon
+server:
+  customMiddleware:
+    - name: fiori-tools-proxy
+      afterMiddleware: compression
+      configuration:
+        ignoreCertError: false # If set to true, certificate errors will be ignored. E.g. self-signed certificates will be accepted
+        backend:
+          - path: /sap
+            url: http://mylearning.com:8020
+            destination: AxiumSAPS4
+    - name: fiori-tools-preview
+      afterMiddleware: fiori-tools-proxy
+      configuration:
+        component: com.victora.cmc.uix
+        ui5Theme: sap_horizon

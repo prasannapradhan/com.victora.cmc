@@ -1,0 +1,28 @@
+.successButton .sapMBtnInner.sapMBtnEmphasized {
+    background-color: green !important;
+    color: white !important;
+}
+
+.infoButton .sapMBtnInner.sapMBtnEmphasized {
+  background-color: #259f9b !important;
+  color: white !important;
+}
+
+.dangerButton .sapMBtnInner.sapMBtnEmphasized {
+  background-color: #e55248 !important;
+  color: white !important;
+}
+
+[data-color="bg-offline"] { 
+  background-color: #faad9c;
+  margin: 3px;
+  border-radius: 5px;
+}
+
+[data-color="bg-online"] { 
+  background-color: #bcfc8f;
+  margin: 3px;
+  border-radius: 5px;
+}
+
+/* Enter your custom styles here */
