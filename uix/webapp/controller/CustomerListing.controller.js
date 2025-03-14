@@ -85,6 +85,7 @@ sap.ui.define([
                    }
                 }
                 console.log(suspectMap);
+                _v.setModel(suspectMap, "cmc");
             },
             showBusy: function () {
                 busyDialog.open();
