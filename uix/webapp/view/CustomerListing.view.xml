@@ -7,5 +7,67 @@
     xmlns:l="sap.ui.layout"
     xmlns:core="sap.ui.core"
 >
+    <App>
+        <Page title="Duplicate customer groups">
+            <content>
+                <FlexBox
+                    direction="Row"
+                    justifyContent="Start"
+                    fitContainer="true"
+                >
+                    <ScrollContainer
+                        width="20rem"
+                        height="98vh"
+                        vertical="true"
+                    >
+                        <List
+                            id="suspectList"
+                            items="{cmc>/suspects}"
+                            mode="SingleSelectMaster"
+                            selectionChange="onSelectionChange"
+                        >
+                            <items>
+                                <StandardListItem title="{cmc>displayKey}" />
+                            </items>
+                        </List>
+                    </ScrollContainer>
 
+                    <!-- Suspect Details Table (Right Side) -->
+                    <table:Table
+                        id="suspectDetailsTable"
+                        rows="{details>/selectedSuspects}"
+                        selectionMode="None"
+                        width="auto"
+                    >
+                        <table:columns>
+                            <table:Column width="8rem">
+                                <Label text="Customer ID" />
+                                <table:template>
+                                    <Text text="{details>CustomerId}" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column width="auto">
+                                <Label text="Name" />
+                                <table:template>
+                                    <Text text="{details>Name}" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column width="auto">
+                                <Label text="Address" />
+                                <table:template>
+                                    <Text text="{details>Address}" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column width="5rem">
+                                <Label text="Region" />
+                                <table:template>
+                                    <Text text="{details>Region}" />
+                                </table:template>
+                            </table:Column>
+                        </table:columns>
+                    </table:Table>
+                </FlexBox>
+            </content>
+        </Page>
+    </App>
 </mvc:View>
