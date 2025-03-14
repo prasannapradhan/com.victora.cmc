@@ -1,6 +1,6 @@
 _schema-version: "3.2"
 ID: victoracmc
-version: 0.0.1
+version: 0.0.3
 modules:
 - name: victoracmc-destination-content
   type: com.sap.application.content
@@ -71,7 +71,7 @@ resources:
             Type: HTTP
             URL: https://ui5.sap.com
           existing_destinations_policy: update
-      version: 1.0.0
+      version: 1.0.1
     service: destination
     service-name: victoracmc-destination-service
     service-plan: lite

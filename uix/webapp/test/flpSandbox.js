@@ -39,7 +39,7 @@ sap.ui.define([
 							"tiles": [{
 								"tileType": "sap.ushell.ui.tile.StaticTile",
 								"properties": {
-									"title": "Product Entry",
+									"title": "Customer Duplicates",
 									"targetURL": "#comvictoracmcuix-display"
 								}
 							}]
@@ -55,7 +55,7 @@ sap.ui.define([
 								"semanticObject": "comvictoracmcuix",
 								"action": "display",
 								"description": "Customer Duplicate Finder Application",
-								"title": "Product Entry",
+								"title": "Customer Duplicates",
 								"signature": {
 									"parameters": {}
 								},

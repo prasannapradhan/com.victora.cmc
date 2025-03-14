@@ -8,7 +8,7 @@
 |**Template Used**<br>simple|
 |**Service Type**<br>OData Url|
 |**Module Name**<br>uix|
-|**Application Title**<br>Product Entry|
+|**Application Title**<br>Customer Duplicates|
 |**Namespace**<br>com.victora.cmc|
 |**UI5 Theme**<br>sap_horizon|
 |**UI5 Version**<br>1.128.1|

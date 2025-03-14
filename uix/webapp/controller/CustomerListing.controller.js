@@ -20,7 +20,7 @@ sap.ui.define([
             showcustomerListing: async function (e) {
                 console.log("Show customer listing..");
                 var cmm = new JSONModel();
-                await cmm.loadData("/model/victora_customer_master.json", false);
+                await cmm.loadData("model/victora_customer_master.json", false);
                 var cmdata = cmm.getData();
                 __gu.removeOdataResponseMetadata(cmdata);
                 cmdata = cmdata.results;

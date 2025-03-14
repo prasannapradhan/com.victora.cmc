@@ -47,7 +47,7 @@
                                     <Text text="{details>CustomerId}" />
                                 </table:template>
                             </table:Column>
-                            <table:Column width="auto">
+                            <table:Column width="18rem">
                                 <Label text="Name" />
                                 <table:template>
                                     <Text text="{details>Name}" />
