@@ -12,14 +12,79 @@ sap.ui.define([
             onInit: function () {
                 _c = this;
                 _v = _c.getView();
-                _c.showcustomerListing();
                 busyDialog = new sap.m.BusyDialog({ text: "Please Wait" });
+                _c.showBusy();
+                _c.showcustomerListing();
+                _c.hideBusy();
             },
             showcustomerListing: async function (e) {
                 console.log("Show customer listing..");
-                var oMydata = new JSONModel();
-                await oMydata.loadData("/model/victora_customer_master.json", false);
-                console.log(JSON.stringify(oMydata.getData()));
+                var cmm = new JSONModel();
+                await cmm.loadData("/model/victora_customer_master.json", false);
+                var cmdata = cmm.getData();
+                __gu.removeOdataResponseMetadata(cmdata);
+                cmdata = cmdata.results;
+                
+                var countryMap = {};
+                for (let i = 0; i < cmdata.length; i++) {
+                    const e = cmdata[i];
+                    e.Name = e.Name.replace(/[^a-zA-Z0-9]/g, " ").trim().replace(/\s+/g, " ");
+                    e.StreetAdd = e.StreetAdd.replace(/[^a-zA-Z0-9]/g, " ").trim().replace(/\s+/g, " ");
+                    e.Address = e.StreetAdd;
+                    if(e.City != ""){
+                        if(e.Address.indexOf(e.City) == -1){
+                            e.Address +=  ' ' + e.City;
+                        }
+                    }
+                    e.Address = e.Address.toLowerCase();
+                    if(e.District != ""){
+                        if(e.Address.indexOf(e.District) == -1){
+                            e.Address +=  ' ' + e.District;
+                        }
+                    }
+                    if(typeof countryMap[e.Country] == "undefined"){
+                        countryMap[e.Country] = {};
+                    }
+                    var taxMap = countryMap[e.Country];
+                    if(typeof taxMap[e.TaxId] == "undefined"){
+                        taxMap[e.TaxId] = {};
+                    }
+                    var pincMap = taxMap[e.TaxId];
+                    if(e.Pincode != ""){
+                        if(typeof pincMap[e.Pincode] == "undefined"){
+                            pincMap[e.Pincode] = [];
+                        }
+                        var suspects = pincMap[e.Pincode];
+                        suspects.push(e);
+                    }else {
+                        if(typeof pincMap[e.City] == "undefined"){
+                            pincMap[e.City] = [];
+                        }
+                        var suspects = pincMap[e.City];
+                        suspects.push(e);
+                    }
+                }
+                var suspectMap = {};
+                for (var cprop in countryMap) {
+                   if(typeof countryMap[cprop] != "undefined"){
+                        var tobj = countryMap[cprop];
+                        for (var tprop in tobj) {
+                            if(typeof tobj[tprop] != "undefined"){
+                                var pobj = tobj[tprop];
+                                for (var pprop in pobj) {
+                                    if(typeof pobj[pprop] != "undefined"){
+                                        var suspects = pobj[pprop];
+                                        if(suspects.length > 1){
+                                            var skey = cprop + "_" + tprop + "_" + pprop;
+                                            suspectMap[skey] = suspects;
+                                        }                                                
+                                    }
+                                }
+                            }
+                        }
+                   }
+                   console.log(suspectMap);
+                }
             },
             showBusy: function () {
                 busyDialog.open();
