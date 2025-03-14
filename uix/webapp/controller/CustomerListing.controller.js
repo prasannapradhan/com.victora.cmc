@@ -83,8 +83,8 @@ sap.ui.define([
                             }
                         }
                    }
-                   console.log(suspectMap);
                 }
+                console.log(suspectMap);
             },
             showBusy: function () {
                 busyDialog.open();
