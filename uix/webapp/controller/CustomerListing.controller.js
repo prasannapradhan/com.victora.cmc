@@ -94,6 +94,7 @@ sap.ui.define([
 
                 var cmcModel = new JSONModel({ suspects: suspectArray });
                 _v.setModel(cmcModel, "cmc");
+                _v.setModel(new JSONModel(), "details");
             },
 
             onSelectionChange: function (oEvent) {
