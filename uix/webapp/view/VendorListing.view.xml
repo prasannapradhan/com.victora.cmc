@@ -10,7 +10,7 @@
             <content>
                 <VBox>
                     <FlexBox
-                        direction="Row "
+                        direction="Row"
                         justifyContent="SpaceBetween"
                         fitContainer="true"
                     >
