@@ -77,17 +77,31 @@
           "target": [
             "TargetcustomerListing"
           ]
+        },
+        {
+          "name": "DuplicateCustomer",
+          "pattern": "DuplicateCustomer",
+          "target": [
+            "TargetDuplicateCustomer"
+          ]
         }
       ],
-      "targets": {
-        "TargetcustomerListing": {
-          "viewType": "XML",
-          "transition": "slide",
-          "clearControlAggregation": false,
-          "viewId": "CustomerListing",
-          "viewName": "CustomerListing"
-        }
-      }
+    "targets": {
+  "TargetcustomerListing": {
+    "viewType": "XML",
+    "transition": "slide",
+    "clearControlAggregation": false,
+    "viewId": "CustomerListing",
+    "viewName": "CustomerListing"
+  },
+  "TargetDuplicateCustomer": {
+    "viewType": "XML",
+    "transition": "slide",
+    "clearControlAggregation": true,
+    "viewId": "DuplicateCustomer",
+    "viewName": "DuplicateCustomer"
+  }
+}
     },
     "rootView": {
       "viewName": "com.victora.cmc.uix.view.App",
