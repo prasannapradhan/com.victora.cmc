@@ -3,7 +3,7 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
     xmlns:table="sap.ui.table"
-    controllerName="com.victora.cmc.uix.controller.CustomerListing"
+    controllerName="com.victora.cmc.uix.controller.VendorListing"
 >
     <App>
         <Page title="Customer Groups">

@@ -79,10 +79,10 @@
           ]
         },
         {
-          "name": "DuplicateCustomer",
-          "pattern": "DuplicateCustomer",
+          "name": "VendorListing",
+          "pattern": "VendorListing",
           "target": [
-            "TargetDuplicateCustomer"
+            "TargetVendorListing"
           ]
         }
       ],
@@ -94,12 +94,12 @@
     "viewId": "CustomerListing",
     "viewName": "CustomerListing"
   },
-  "TargetDuplicateCustomer": {
+  "TargetVendorListing": {
     "viewType": "XML",
     "transition": "slide",
     "clearControlAggregation": true,
-    "viewId": "DuplicateCustomer",
-    "viewName": "DuplicateCustomer"
+    "viewId": "VendorListing",
+    "viewName": "VendorListing"
   }
 }
     },

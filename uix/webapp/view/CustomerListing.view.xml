@@ -37,7 +37,7 @@
                         </Select>
                         <Button
                             text="Vendor"
-                            press="onDuplicatePage"
+                            press="onVentorListing"
                         />
                     </FlexBox>
                     <FlexBox
