@@ -6,51 +6,32 @@
     controllerName="com.victora.cmc.uix.controller.VendorListing"
 >
     <App>
-        <Page title="Customer Groups">
+        <Page title="Vendor Groups">
             <content>
                 <VBox>
-                    <FlexBox
-                        direction="Row"
-                        justifyContent="SpaceBetween"
-                        fitContainer="true"
-                    >
-                        <Select
-                            id="filterSelectDuplicate"
-                            change="onFilterChange"
-                        >
+                    <Toolbar>
+                        <!-- Dropdown Filter -->
+                        <Select id="vendorFilterSelect" change="onFilterChange">
                             <items>
-                                <core:Item
-                                    key="All"
-                                    text="All Customers"
-                                />
-                                <core:Item
-                                    key="National"
-                                    text="National (India)"
-                                />
-                                <core:Item
-                                    key="International"
-                                    text="International"
-                                />
+                                <core:Item key="All" text="All Customers"/>
+                                <core:Item key="National" text="National (India)"/>
+                                <core:Item key="International" text="International"/>
                             </items>
                         </Select>
-                        <Button
-                            text="Customer"
-                            press="onCustomerPage"
-                            icon="sap-icon://navigation-left-arrow"
-                            iconFirst="true"
-                        />
-                    </FlexBox>
-                    <FlexBox
-                        direction="Row"
-                        justifyContent="Start"
-                        fitContainer="true"
-                    >
+                        <ToolbarSpacer/>
+                    
+                       <!-- Input Field for Percentage -->
+                       <Input id="vendorPercentageInput" placeholder="Enter %" width="10rem"/>
+                    
+                       <!-- Go Button -->
+                       <Button text="Go" press="onGoPress"/>
+                        <ToolbarSpacer/>
+                        <Button text="Customer" press="onVendorPage"/>
+                    </Toolbar>
+                    
+                    <FlexBox direction="Row" justifyContent="Start" fitContainer="true">
                         <!--  Suspect List  -->
-                        <ScrollContainer
-                            width="22rem"
-                            height="85vh"
-                            vertical="true"
-                        >
+                        <ScrollContainer width="22rem" height="85vh" vertical="true">
                             <List
                                 id="suspectListDuplicate"
                                 items="{cmc>/suspects}"
@@ -61,12 +42,11 @@
                                 growingScrollToLoad="true"
                             >
                                 <items>
-                                    <StandardListItem
-                                        title="{cmc>displayKey}"
-                                    />
+                                    <StandardListItem title="{cmc>displayKey}" />
                                 </items>
                             </List>
                         </ScrollContainer>
+                        
                         <!--  Suspect Details Table  -->
                         <table:Table
                             id="suspectDetailsTableDuplicate"
@@ -74,43 +54,36 @@
                             selectionMode="None"
                             width="auto"
                         >
-                            <table:Column width="8rem">
-                                <Label text="Similarity (%)" />
-                                <table:template>
-                                    <Text text="{details>Similarity}">
-                                        <customData>
-                                            <core:CustomData
-                                                key="bgColor"
-                                                value="{details>bgColor}"
-                                                writeToDom="true"
-                                            />
-                                        </customData>
-                                    </Text>
-                                </table:template>
-                            </table:Column>
                             <table:columns>
-                                <table:Column width="8rem">
-                                    <Label text="Customer ID" />
+                                <table:Column width="6rem">
+                                    <Label text="Match (%)"/>
                                     <table:template>
-                                        <Text text="{details>CustomerId}" />
+                                        <Text text="{details>MatchGroup}" class="boldText"/>
+                                    </table:template>
+                                </table:Column>
+
+                                <table:Column width="auto">
+                                    <Label text="Address"/>
+                                    <table:template>
+                                        <Text text="{details>Address}"/>
+                                    </table:template>
+                                </table:Column>
+                                <table:Column width="8rem">
+                                    <Label text="Vendor ID"/>
+                                    <table:template>
+                                        <Text text="{details>VendorId}"/>
                                     </table:template>
                                 </table:Column>
                                 <table:Column width="18rem">
-                                    <Label text="Name" />
+                                    <Label text="Name"/>
                                     <table:template>
-                                        <Text text="{details>Name}" />
-                                    </table:template>
-                                </table:Column>
-                                <table:Column width="auto">
-                                    <Label text="Address" />
-                                    <table:template>
-                                        <Text text="{details>Address}" />
+                                        <Text text="{details>Name}"/>
                                     </table:template>
                                 </table:Column>
                                 <table:Column width="5rem">
-                                    <Label text="Region" />
+                                    <Label text="Region"/>
                                     <table:template>
-                                        <Text text="{details>Region}" />
+                                        <Text text="{details>Region}"/>
                                     </table:template>
                                 </table:Column>
                             </table:columns>
