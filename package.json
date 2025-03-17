@@ -1,6 +1,6 @@
 {
   "name": "mta-project",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "Build and deployment scripts",
   "scripts": {
     "clean": "rimraf resources mta_archives mta-op*",

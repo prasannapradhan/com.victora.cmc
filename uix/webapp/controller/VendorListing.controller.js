@@ -7,8 +7,12 @@ sap.ui.define([
 ], function (Controller, JSONModel, GeneralUtils, MessageBox, MessageToast) {
     "use strict";
 
+    var _cref = this;
+    var currNodeData = {};
+
     return Controller.extend("com.victora.cmc.uix.controller.VendorListing", {
         onInit: function () {
+            _cref = this;
             this._view = this.getView();
             this._allSuspectData = [];
 
@@ -61,15 +65,13 @@ sap.ui.define([
                     )
                 )
             );
-
-            this.applySimilarityMatching(80);
             this.updateSuspectList("All");
         },
 
         updateSuspectList: function (filterType) {
             let filteredData = this._allSuspectData.filter(item =>
                 filterType === "National" ? item.country.startsWith("IN") :
-                filterType === "International" ? !item.country.startsWith("IN") : true
+                    filterType === "International" ? !item.country.startsWith("IN") : true
             );
             this._view.setModel(new JSONModel({ suspects: filteredData }), "cmc");
         },
@@ -94,20 +96,12 @@ sap.ui.define([
 
         onSelectionChange: function (oEvent) {
             let sKey = oEvent.getParameter("listItem").getBindingContext("cmc").getProperty("key");
-    let suspectData = this._allSuspectData.find(item => item.key === sKey);
-
-    if (suspectData) {
-        // Show Loader
-        sap.ui.core.BusyIndicator.show(0);
-
-        setTimeout(() => {
-            this._view.getModel("details").setProperty("/selectedSuspects", suspectData.suspects);
-            
-            // Hide Loader after processing
+            let suspectData = this._allSuspectData.find(item => item.key === sKey);
+            sap.ui.core.BusyIndicator.show(0);
+            currNodeData = suspectData;
+            _cref.applySimilarityMatching(80);
             sap.ui.core.BusyIndicator.hide();
-        }, 1000); // Simulating some processing delay
-    }
-},
+        },
 
         onFilterChange: function (oEvent) {
             this.updateSuspectList(oEvent.getParameter("selectedItem").getKey());
@@ -119,49 +113,43 @@ sap.ui.define([
                 MessageBox.error("Please enter a valid percentage between 0 and 100.");
                 return;
             }
-
             this.applySimilarityMatching(similarityThreshold);
-            MessageToast.show(`Match groups updated with ${similarityThreshold}% similarity.`);
         },
 
         applySimilarityMatching: function (similarityThreshold) {
-            this._allSuspectData.forEach(suspectGroup => {
-                let groupCounter = 1;
-                let suspects = [...suspectGroup.suspects];
+            sap.ui.core.BusyIndicator.show(0);    
+            var opsData = JSON.parse(JSON.stringify(currNodeData));
+            if (typeof opsData != "undefined") {
+                var suspects = opsData.suspects;
+                let alternateSuspects = [];
+                var groupCounter = 0;
 
                 while (suspects.length > 0) {
-                    let baseSuspect = suspects.shift();
-                    baseSuspect.MatchGroup = `${similarityThreshold}p${groupCounter}`;
-                    let matchedGroup = [baseSuspect];
-                    let remaining = [];
-
-                    suspects.forEach(suspect => {
-                        let similarity = this.calculateAddressSimilarity(baseSuspect.Address, suspect.Address);
-                        if (similarity >= similarityThreshold) {
-                            suspect.MatchGroup = `${similarityThreshold}p${groupCounter}`;
-                            matchedGroup.push(suspect);
+                    for (let i = 0; i < suspects.length; i++) {
+                        const s = suspects[i];
+                        if (i == 0) {
+                            s.Duplicate = false;
+                            groupCounter++;
+                            s.MatchGroup = "P_" + similarityThreshold + "_" + groupCounter;
+                            alternateSuspects.push(s);
                         } else {
-                            remaining.push(suspect);
+                            let similarity = _cref.calculateAddressSimilarity(suspects[0].Address, s.Address);
+                            if (similarity >= similarityThreshold) {
+                                s.MatchGroup = "P_" + similarityThreshold + "_" + groupCounter;
+                                s.Duplicate = true;
+                                alternateSuspects.push(s);
+                            }
                         }
-                    });
-
-                    suspects = remaining;
-                    groupCounter++;
+                    }
+                    // TODO : Remove all the elements from alternate from main
+                    suspects = suspects.filter(e => !alternateSuspects.some(s => s.VendorId === e.VendorId));
+                    //console.log(suspects);
                 }
-            });
-
-            this._allSuspectData.forEach(suspectGroup => {
-                suspectGroup.suspects.sort((a, b) => a.MatchGroup.localeCompare(b.MatchGroup));
-            });
-
-            let cmcModel = this._view.getModel("cmc");
-            if (cmcModel) {
-                cmcModel.refresh(true);
+                //console.log(alternateSuspects);
+                this._view.getModel("details").setProperty("/selectedSuspects", alternateSuspects);
+                sap.ui.core.BusyIndicator.hide();
             } else {
-                this._view.setModel(new JSONModel({ suspects: this._allSuspectData }), "cmc");
             }
-
-            this._view.getModel("details").setProperty("/selectedSuspects", []);
         },
 
         onVendorPage: function () {

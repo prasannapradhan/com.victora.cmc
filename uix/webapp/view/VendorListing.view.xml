@@ -3,35 +3,66 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
     xmlns:table="sap.ui.table"
+    xmlns:l="sap.ui.layout"
     controllerName="com.victora.cmc.uix.controller.VendorListing"
 >
     <App>
-        <Page title="Vendor Groups">
+        <Page title="Duplicate Vendor Groups">
             <content>
                 <VBox>
                     <Toolbar>
                         <!-- Dropdown Filter -->
-                        <Select id="vendorFilterSelect" change="onFilterChange">
+                        <Select
+                            id="vendorFilterSelect"
+                            change="onFilterChange"
+                        >
                             <items>
-                                <core:Item key="All" text="All Customers"/>
-                                <core:Item key="National" text="National (India)"/>
-                                <core:Item key="International" text="International"/>
+                                <core:Item
+                                    key="All"
+                                    text="All Customers"
+                                />
+                                <core:Item
+                                    key="National"
+                                    text="National (India)"
+                                />
+                                <core:Item
+                                    key="International"
+                                    text="International"
+                                />
                             </items>
                         </Select>
-                        <ToolbarSpacer/>
-                    
-                       <!-- Input Field for Percentage -->
-                       <Input id="vendorPercentageInput" placeholder="Enter %" width="10rem"/>
-                    
-                       <!-- Go Button -->
-                       <Button text="Go" press="onGoPress"/>
-                        <ToolbarSpacer/>
-                        <Button text="Customer" press="onVendorPage"/>
+                        <ToolbarSpacer />
+
+                        <!-- Input Field for Percentage -->
+                        <Input
+                            id="vendorPercentageInput"
+                            placeholder="Enter %"
+                            width="10rem"
+                        />
+
+                        <!-- Go Button -->
+                        <Button
+                            text="Go"
+                            press="onGoPress"
+                        />
+                        <ToolbarSpacer />
+                        <Button
+                            text="Customer"
+                            press="onVendorPage"
+                        />
                     </Toolbar>
-                    
-                    <FlexBox direction="Row" justifyContent="Start" fitContainer="true">
+
+                    <FlexBox
+                        direction="Row"
+                        justifyContent="Start"
+                        fitContainer="true"
+                    >
                         <!--  Suspect List  -->
-                        <ScrollContainer width="22rem" height="85vh" vertical="true">
+                        <ScrollContainer
+                            width="22rem"
+                            height="85vh"
+                            vertical="true"
+                        >
                             <List
                                 id="suspectListDuplicate"
                                 items="{cmc>/suspects}"
@@ -42,11 +73,13 @@
                                 growingScrollToLoad="true"
                             >
                                 <items>
-                                    <StandardListItem title="{cmc>displayKey}" />
+                                    <StandardListItem
+                                        title="{cmc>displayKey}"
+                                    />
                                 </items>
                             </List>
                         </ScrollContainer>
-                        
+
                         <!--  Suspect Details Table  -->
                         <table:Table
                             id="suspectDetailsTableDuplicate"
@@ -56,34 +89,49 @@
                         >
                             <table:columns>
                                 <table:Column width="6rem">
-                                    <Label text="Match (%)"/>
+                                    <Label text="Match (%)" />
                                     <table:template>
-                                        <Text text="{details>MatchGroup}" class="boldText"/>
+                                        <l:HorizontalLayout>
+                                            <l:content>
+                                                <Text
+                                                    text="{details>MatchGroup}"
+                                                    class="boldText"
+                                                    visible="{= !${details>Duplicate}}"
+                                                />
+                                                <ObjectStatus
+                                                    class="sapUiSmallPadding sapUiSmallMargin"
+                                                    text="{details>MatchGroup}"
+                                                    state="Success"
+                                                    visible="{= ${details>Duplicate}}"
+                                                    inverted="true"
+                                                />
+                                            </l:content>
+                                        </l:HorizontalLayout>
                                     </table:template>
                                 </table:Column>
 
                                 <table:Column width="auto">
-                                    <Label text="Address"/>
+                                    <Label text="Address" />
                                     <table:template>
-                                        <Text text="{details>Address}"/>
+                                        <Text text="{details>Address}" />
                                     </table:template>
                                 </table:Column>
                                 <table:Column width="8rem">
-                                    <Label text="Vendor ID"/>
+                                    <Label text="Vendor ID" />
                                     <table:template>
-                                        <Text text="{details>VendorId}"/>
+                                        <Text text="{details>VendorId}" />
                                     </table:template>
                                 </table:Column>
                                 <table:Column width="18rem">
-                                    <Label text="Name"/>
+                                    <Label text="Name" />
                                     <table:template>
-                                        <Text text="{details>Name}"/>
+                                        <Text text="{details>Name}" />
                                     </table:template>
                                 </table:Column>
                                 <table:Column width="5rem">
-                                    <Label text="Region"/>
+                                    <Label text="Region" />
                                     <table:template>
-                                        <Text text="{details>Region}"/>
+                                        <Text text="{details>Region}" />
                                     </table:template>
                                 </table:Column>
                             </table:columns>
