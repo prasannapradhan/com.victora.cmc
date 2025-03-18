@@ -6,7 +6,7 @@ sap.ui.define([
     "sap/m/MessageToast"
 ], function (Controller, JSONModel, GeneralUtils, MessageBox, MessageToast) {
     "use strict";
-
+    
     var _cref = this;
     var currNodeData = {};
 
@@ -41,24 +41,21 @@ sap.ui.define([
         processCustomerData: function (customerData) {
             let countryMap = {};
             customerData.forEach(e => {
+                // Clean up StreetAdd, City, and District for display
                 e.Name = e.Name.replace(/[^a-zA-Z0-9]/g, " ").trim().replace(/\s+/g, " ");
-                e.Address = [e.StreetAdd, e.City, e.District].filter(Boolean).join(" ").toLowerCase();
-
-                e.Address = "";
-                if(e.City.trim() != ""){
-                    e.Address += ',' + e.City;
-                }
-                if(e.District.trim() != ""){
-                    e.Address += ',' + e.District;
-                }
-
+                e.StreetAdd = e.StreetAdd.replace(/[^a-zA-Z0-9]/g, " ").trim().replace(/\s+/g, " ");
+        
+                // Construct Address for display only (not for comparison)
+                e.Address = [e.StreetAdd, e.City, e.District].filter(Boolean).join(", ");
+        
+                // Group data by Country, TaxId, and Pincode/City
                 if (!countryMap[e.Country]) countryMap[e.Country] = {};
                 if (!countryMap[e.Country][e.TaxId]) countryMap[e.Country][e.TaxId] = {};
                 let key = e.Pincode || e.City;
                 if (!countryMap[e.Country][e.TaxId][key]) countryMap[e.Country][e.TaxId][key] = [];
                 countryMap[e.Country][e.TaxId][key].push(e);
             });
-
+        
             this.constructSuspectMap(countryMap);
         },
 
@@ -75,6 +72,7 @@ sap.ui.define([
                     )
                 )
             );
+
             // **Set Default Match Group to 95p**
             this.updateSuspectList("All");
         },
@@ -101,18 +99,29 @@ sap.ui.define([
 
         calculateAddressSimilarity: function (addr1, addr2) {
             if (!addr1 || !addr2) return 0;
-
+        
             // Ensure addr1 is always the shorter string
             if (addr1.length > addr2.length) {
                 [addr1, addr2] = [addr2, addr1]; // Swap to maintain order
             }
-
+            // Check if the shorter address is a substring of the longer address
+            if (addr2.includes(addr1)) {
+                return 100; // Exact substring match
+            }
+            let tokens1 = addr1.split(/\s+/);
+            let tokens2 = addr2.split(/\s+/);
+        
+            let allTokensMatch = tokens1.every(token => tokens2.includes(token));
+            if (allTokensMatch) {
+                return 100; // All tokens of the shorter address are present in the longer address
+            }
+            // Calculate Levenshtein distance for partial matches
             let maxLength = addr2.length;
-            let similarityScore = ((maxLength - this.calculateLevenshteinDistance(addr1, addr2)) / maxLength) * 100;
-
+            let distance = this.calculateLevenshteinDistance(addr1, addr2);
+            let similarityScore = ((maxLength - distance) / maxLength) * 100;
+        
             return similarityScore.toFixed(2);
         },
-
 
         onSelectionChange: function (oEvent) {
             let sKey = oEvent.getParameter("listItem").getBindingContext("cmc").getProperty("key");
@@ -138,13 +147,13 @@ sap.ui.define([
         },
 
         applySimilarityMatching: function (similarityThreshold) {
-            sap.ui.core.BusyIndicator.show(0);
+            sap.ui.core.BusyIndicator.show(0);    
             var opsData = JSON.parse(JSON.stringify(currNodeData));
             if (typeof opsData != "undefined") {
                 var suspects = opsData.suspects;
                 let alternateSuspects = [];
                 var groupCounter = 0;
-
+        
                 while (suspects.length > 0) {
                     for (let i = 0; i < suspects.length; i++) {
                         const s = suspects[i];
@@ -154,7 +163,14 @@ sap.ui.define([
                             s.MatchGroup = "P_" + similarityThreshold + "_" + groupCounter;
                             alternateSuspects.push(s);
                         } else {
-                            let similarity = _cref.calculateAddressSimilarity(suspects[0].Address, s.Address);
+                            console.log("Comparing StreetAdd:");
+                            console.log("StreetAdd 1:", suspects[0].StreetAdd);
+                            console.log("StreetAdd 2:", s.StreetAdd);
+        
+                            // Compare only StreetAdd for similarity
+                            let similarity = _cref.calculateAddressSimilarity(suspects[0].StreetAdd, s.StreetAdd);
+                            console.log("Similarity Score:", similarity);
+        
                             if (similarity >= similarityThreshold) {
                                 s.MatchGroup = "P_" + similarityThreshold + "_" + groupCounter;
                                 s.Duplicate = true;
@@ -162,14 +178,14 @@ sap.ui.define([
                             }
                         }
                     }
-                    // TODO : Remove all the elements from alternate from main
+                    // Remove all the elements from alternate from main
                     suspects = suspects.filter(e => !alternateSuspects.some(s => s.CustomerId === e.CustomerId));
-                    //console.log(suspects);
                 }
-                //console.log(alternateSuspects);
+                // Update the model with the matched suspects
                 this._view.getModel("details").setProperty("/selectedSuspects", alternateSuspects);
                 sap.ui.core.BusyIndicator.hide();
             } else {
+                // Handle the case where opsData is undefined
             }
         },
         onCustomerPage: function () {
