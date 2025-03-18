@@ -11,46 +11,20 @@
             <content>
                 <VBox>
                     <Toolbar>
-                        <!-- Dropdown Filter -->
-                        <Select
-                            id="vendorFilterSelect"
-                            change="onFilterChange"
-                        >
-                            <items>
-                                <core:Item
-                                    key="All"
-                                    text="All Customers"
-                                />
-                                <core:Item
-                                    key="National"
-                                    text="National (India)"
-                                />
-                                <core:Item
-                                    key="International"
-                                    text="International"
-                                />
-                            </items>
+                        <!--  Dropdown Filter  -->
+                        <Select id="vendorFilterSelect" change="onFilterChange">
+                        <items>
+                        <core:Item key="All" text="All Vendor"/>
+                        <core:Item key="National" text="National (India)"/>
+                        <core:Item key="International" text="International"/>
+                        </items>
                         </Select>
-                        <ToolbarSpacer />
-
-                        <!-- Input Field for Percentage -->
-                        <Input
-                            id="vendorPercentageInput"
-                            placeholder="Enter %"
-                            width="10rem"
-                        />
-
-                        <!-- Go Button -->
-                        <Button
-                            text="Go"
-                            press="onGoPress"
-                        />
-                        <ToolbarSpacer />
-                        <Button
-                            text="Customer"
-                            press="onVendorPage"
-                        />
-                    </Toolbar>
+                        <Input id="vendorPercentageInput" class="Percentage" placeholder="Enter %" width="10rem"/>
+                        <!--  Go Button  -->
+                        <Button text="Go" press="onGoPress" class="myCustomButton"/>
+                        <ToolbarSpacer/>
+                        <Button text="Customer" press="onVendorPage" class="myCustomButton"/>
+                        </Toolbar>
 
                     <FlexBox
                         direction="Row"

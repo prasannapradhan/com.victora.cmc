@@ -1,52 +1,57 @@
 .successButton .sapMBtnInner.sapMBtnEmphasized {
-    background-color: green !important;
-    color: white !important;
+  background-color: green !important;
+  color: white !important;
 }
 
 .infoButton .sapMBtnInner.sapMBtnEmphasized {
-  background-color: #259f9b !important;
-  color: white !important;
+background-color: #259f9b !important;
+color: white !important;
 }
 
 .dangerButton .sapMBtnInner.sapMBtnEmphasized {
-  background-color: #e55248 !important;
-  color: white !important;
+background-color: #e55248 !important;
+color: white !important;
 }
 
 [data-color="bg-offline"] { 
-  background-color: #faad9c;
-  margin: 3px;
-  border-radius: 5px;
+background-color: #faad9c;
+margin: 3px;
+border-radius: 5px;
 }
 
 [data-color="bg-online"] { 
-  background-color: #bcfc8f;
-  margin: 3px;
-  border-radius: 5px;
+background-color: #bcfc8f;
+margin: 3px;
+border-radius: 5px;
 }
 
 .customTableBackground .sapUiTableRowAlternating {
-  background-color: #f5f5f5 !important; /* Light grey */
+background-color: #f5f5f5 !important; /* Light grey */
 }
 
 .customTableBackground .sapUiTableRow {
-  background-color: #ffffff !important; /* White */
+background-color: #ffffff !important; /* White */
 }
 
 .boldText {
-  font-weight: bold;
+font-weight: bold;
+} 
+
+.myCustomButton {
+background-color: #0b92db !important;
+font-weight: bold;
+border-radius: 8px;
+padding: 1px 1px;
+border: none;
+cursor: pointer;
+height: 36px;
 }
 
-/* General table row styles */
-.customTableBackground .sapUiTableRow {
-  background-color: white !important; /* Default */
+.sapMIBar .sapMBtn .sapMBtnInner.sapMBtnDefault:not(.sapMToggleBtnPressed), .sapMIBar .sapMBtn .sapMBtnInner.sapMBtnDefault .sapUiIcon, .sapUxAPObjectPageHeaderIdentifierActions .sapMBtn .sapMBtnInner.sapMBtnDefault, .sapUxAPObjectPageHeaderIdentifierActions .sapMBtn .sapMBtnInner.sapMBtnDefault .sapUiIcon {
+color: #ffffff !important;
+background-color: var(--sapButton_Lite_Background);
+}
+.sapMIBar .sapMBtn:hover:not(.sapMBtnDisabled):not(.sapMSBActive)>.sapMBtnHoverable:not(.sapMBtnDisabled):not(.sapMBtnActive):not(.sapMToggleBtnPressed):not(.sapMBtnTransparent).sapMBtnDefault, .sapMBtn:hover:not(.sapMBtnDisabled):not(.sapMSBActive)>.sapMBtnHoverable:not(.sapMBtnDisabled):not(.sapMBtnActive):not(.sapMToggleBtnPressed):not(.sapMBtnTransparent).sapMBtnBack, .sapUxAPObjectPageHeaderIdentifierActions .sapMBtn:hover:not(.sapMBtnDisabled):not(.sapMSBActive)>.sapMBtnHoverable:not(.sapMBtnDisabled):not(.sapMBtnActive):not(.sapMToggleBtnPressed):not(.sapMBtnTransparent).sapMBtnDefault {
+color: #f5f6f7 !important;
 }
 
-/* Apply different colors based on custom data */
-.customTableBackground .sapUiTableRow[data-bgcolor="bg-offline"] {
-  background-color: #faad9c !important;
-}
-
-.customTableBackground .sapUiTableRow[data-bgcolor="bg-online"] {
-  background-color: #bcfc8f !important;
-}

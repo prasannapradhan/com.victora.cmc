@@ -19,7 +19,7 @@ sap.ui.define([
             // Set initial model with default similarity threshold
             this._view.setModel(new JSONModel({
                 selectedSuspects: [],
-                similarityThreshold: 80 // Default similarity threshold
+                similarityThreshold: 95 // Default similarity threshold
             }), "details");
 
             this.showCustomerListing();
@@ -67,7 +67,7 @@ sap.ui.define([
                 )
             );
 
-            // **Set Default Match Group to 80p**
+            // **Set Default Match Group to 95p**
             this.updateSuspectList("All");
         },
 
@@ -93,16 +93,25 @@ sap.ui.define([
 
         calculateAddressSimilarity: function (addr1, addr2) {
             if (!addr1 || !addr2) return 0;
-            let maxLength = Math.max(addr1.length, addr2.length);
-            return maxLength ? ((maxLength - this.calculateLevenshteinDistance(addr1, addr2)) / maxLength * 100).toFixed(2) : 100;
+            
+            // Ensure addr1 is always the shorter string
+            if (addr1.length > addr2.length) {
+                [addr1, addr2] = [addr2, addr1]; // Swap to maintain order
+            }
+        
+            let maxLength = addr2.length;
+            let similarityScore = ((maxLength - this.calculateLevenshteinDistance(addr1, addr2)) / maxLength) * 100;
+            
+            return similarityScore.toFixed(2);
         },
+        
 
         onSelectionChange: function (oEvent) {
             let sKey = oEvent.getParameter("listItem").getBindingContext("cmc").getProperty("key");
             let suspectData = this._allSuspectData.find(item => item.key === sKey);
             sap.ui.core.BusyIndicator.show(0);
             currNodeData = suspectData;
-            _cref.applySimilarityMatching(80);
+            _cref.applySimilarityMatching(95);
             sap.ui.core.BusyIndicator.hide();
         },
 
