@@ -21,17 +21,30 @@
                             </items>
                         </Select>
                         
-                
-                  
                         <!-- Input Field for Percentage -->
-                        <Input id="percentageInput" placeholder="Enter %"  width="10rem"/>
+                        <Input
+                            id="percentageInput"
+                            placeholder="Enter %"
+                            width="10rem"
+                            value="{details>/similarityThreshold}"
+                            type="Number"
+                            liveChange="onLiveChange"
+                            submit="onGoPress"
+                        />
                     
-                        <!-- Go Button -->
-                        <Button text="Go" press="onGoPress"  class="myCustomButton"/>
+                    
+                        <!-- Search Button -->
+                        <Button
+                            text="Search %"
+                            type="Emphasized"
+                            icon="sap-icon://search"
+                            class="sapUiSmallMarginBegin"
+                            press="onGoPress"
+                        />
                     
                         <ToolbarSpacer/>
                     
-                        <Button text="Vendor" press="onCustomerPage" class="myCustomButton"/>
+                        <Button text="Vendor" type="Emphasized" press="onCustomerPage" class="myCustomButton"/>
                     </Toolbar>
                     <FlexBox
                         direction="Row"

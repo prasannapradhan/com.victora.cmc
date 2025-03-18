@@ -136,6 +136,8 @@ sap.ui.define([
             this.updateSuspectList(oEvent.getParameter("selectedItem").getKey());
         },
 
+     
+        
         onGoPress: function () {
             let similarityThreshold = parseInt(this._view.byId("percentageInput").getValue(), 10);
             if (isNaN(similarityThreshold) || similarityThreshold < 0 || similarityThreshold > 100) {
@@ -143,50 +145,47 @@ sap.ui.define([
                 return;
             }
             this.applySimilarityMatching(similarityThreshold);
-            //MessageToast.show(`Match groups updated with ${similarityThreshold}% similarity.`);
         },
 
         applySimilarityMatching: function (similarityThreshold) {
-            sap.ui.core.BusyIndicator.show(0);    
+            sap.ui.core.BusyIndicator.show(0);
             var opsData = JSON.parse(JSON.stringify(currNodeData));
-            if (typeof opsData != "undefined") {
-                var suspects = opsData.suspects;
-                let alternateSuspects = [];
-                var groupCounter = 0;
+            if (typeof opsData === "undefined") return;
         
-                while (suspects.length > 0) {
-                    for (let i = 0; i < suspects.length; i++) {
-                        const s = suspects[i];
-                        if (i == 0) {
-                            s.Duplicate = false;
-                            groupCounter++;
-                            s.MatchGroup = "P_" + similarityThreshold + "_" + groupCounter;
-                            alternateSuspects.push(s);
-                        } else {
-                            console.log("Comparing StreetAdd:");
-                            console.log("StreetAdd 1:", suspects[0].StreetAdd);
-                            console.log("StreetAdd 2:", s.StreetAdd);
+            let suspects = opsData.suspects;
+            let alternateSuspects = [];
+            let groupCounter = 0;
         
-                            // Compare only StreetAdd for similarity
-                            let similarity = _cref.calculateAddressSimilarity(suspects[0].StreetAdd, s.StreetAdd);
-                            console.log("Similarity Score:", similarity);
+            while (suspects.length > 0) {
+                let baseSuspect = suspects[0];
+                baseSuspect.Duplicate = false;
+                baseSuspect.MatchGroup = `P_${similarityThreshold}_${++groupCounter}`;
+                alternateSuspects.push(baseSuspect);
         
-                            if (similarity >= similarityThreshold) {
-                                s.MatchGroup = "P_" + similarityThreshold + "_" + groupCounter;
-                                s.Duplicate = true;
-                                alternateSuspects.push(s);
-                            }
-                        }
+                for (let i = 1; i < suspects.length; i++) {
+                    let suspect = suspects[i];
+                    console.log("Comparing StreetAdd:");
+                    console.log("StreetAdd 1:", baseSuspect.StreetAdd);
+                    console.log("StreetAdd 2:", suspect.StreetAdd);
+        
+                    let similarity = _cref.calculateAddressSimilarity(baseSuspect.StreetAdd, suspect.StreetAdd);
+                    console.log("Similarity Score:", similarity);
+        
+                    if (similarity >= similarityThreshold) {
+                        suspect.MatchGroup = `P_${similarityThreshold}_${groupCounter}`;
+                        suspect.Duplicate = true;
+                        alternateSuspects.push(suspect);
                     }
-                    // Remove all the elements from alternate from main
-                    suspects = suspects.filter(e => !alternateSuspects.some(s => s.CustomerId === e.CustomerId));
                 }
-                // Update the model with the matched suspects
-                this._view.getModel("details").setProperty("/selectedSuspects", alternateSuspects);
-                sap.ui.core.BusyIndicator.hide();
-            } else {
-                // Handle the case where opsData is undefined
+        
+                // Remove matched suspects from the main list
+                suspects = suspects.filter(e => !alternateSuspects.some(s => s.CustomerId === e.CustomerId));
             }
+
+            this._view.getModel("details").setProperty("/similarityThreshold", similarityThreshold);
+            // Update the model with the matched suspects
+            this._view.getModel("details").setProperty("/selectedSuspects", alternateSuspects);
+            sap.ui.core.BusyIndicator.hide();
         },
         onCustomerPage: function () {
             var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
@@ -198,7 +197,8 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
                 oRouter.navTo("VendorListing");
             }, 1000);
-        }
+        },
+        
 
 
     });
