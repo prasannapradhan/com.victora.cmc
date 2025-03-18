@@ -6,7 +6,7 @@ sap.ui.define([
     "sap/m/MessageToast"
 ], function (Controller, JSONModel, GeneralUtils, MessageBox, MessageToast) {
     "use strict";
-    
+
     var _cref = this;
     var currNodeData = {};
 
@@ -43,6 +43,15 @@ sap.ui.define([
             customerData.forEach(e => {
                 e.Name = e.Name.replace(/[^a-zA-Z0-9]/g, " ").trim().replace(/\s+/g, " ");
                 e.Address = [e.StreetAdd, e.City, e.District].filter(Boolean).join(" ").toLowerCase();
+
+                e.Address = "";
+                if(e.City.trim() != ""){
+                    e.Address += ',' + e.City;
+                }
+                if(e.District.trim() != ""){
+                    e.Address += ',' + e.District;
+                }
+
                 if (!countryMap[e.Country]) countryMap[e.Country] = {};
                 if (!countryMap[e.Country][e.TaxId]) countryMap[e.Country][e.TaxId] = {};
                 let key = e.Pincode || e.City;
@@ -66,7 +75,6 @@ sap.ui.define([
                     )
                 )
             );
-
             // **Set Default Match Group to 95p**
             this.updateSuspectList("All");
         },
@@ -93,18 +101,18 @@ sap.ui.define([
 
         calculateAddressSimilarity: function (addr1, addr2) {
             if (!addr1 || !addr2) return 0;
-            
+
             // Ensure addr1 is always the shorter string
             if (addr1.length > addr2.length) {
                 [addr1, addr2] = [addr2, addr1]; // Swap to maintain order
             }
-        
+
             let maxLength = addr2.length;
             let similarityScore = ((maxLength - this.calculateLevenshteinDistance(addr1, addr2)) / maxLength) * 100;
-            
+
             return similarityScore.toFixed(2);
         },
-        
+
 
         onSelectionChange: function (oEvent) {
             let sKey = oEvent.getParameter("listItem").getBindingContext("cmc").getProperty("key");
@@ -130,7 +138,7 @@ sap.ui.define([
         },
 
         applySimilarityMatching: function (similarityThreshold) {
-            sap.ui.core.BusyIndicator.show(0);    
+            sap.ui.core.BusyIndicator.show(0);
             var opsData = JSON.parse(JSON.stringify(currNodeData));
             if (typeof opsData != "undefined") {
                 var suspects = opsData.suspects;
