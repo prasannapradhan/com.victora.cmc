@@ -38,7 +38,7 @@
                         <ObjectStatus
                             class="sapUiTinyMarginEnd"
                             text="{vcfg>/vendorCountText}"
-                            state="Indication07"
+                            state="Warning"
                             inverted="true"
                         />
 
@@ -64,13 +64,13 @@
                         <ToolbarSpacer />
 
                         <!-- Download All Button -->
-                        <HBox alignItems="Center" class=" sapUiTinyMarginBottom  sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd">
-                            <!-- Download All Button -->
+                        <HBox alignItems="Center" 
+                        class="sapUiResponsivePadding sapUiTinyMargin">
                             <Button
                                 icon="sap-icon://download"
                                 text="Download All"
                                 press="downloadAllSuspects"
-                                type="Accept"
+                                type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
                         
@@ -79,7 +79,7 @@
                                 icon="sap-icon://download"
                                 text="Download Group"
                                 press=".downloadGroupData"
-                                type="Attention"
+                                type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
                         
@@ -88,7 +88,7 @@
                                 icon="sap-icon://switch-views"
                                 text="Customer"
                                 press="onVendorPage"
-                                type="Emphasized"
+                                type="Attention"
                                 class="sapUiSmallMarginEnd"
                             />
                         </HBox>
