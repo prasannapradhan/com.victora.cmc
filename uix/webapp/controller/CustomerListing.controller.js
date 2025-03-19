@@ -163,32 +163,43 @@ sap.ui.define([
             this.updateSuspectList(oEvent.getParameter("selectedItem").getKey());
         },
 
-        handleCustomerThresholdChange: function () {
-            this.applySimilarityMatching(parseInt(_cfg.threshold));
+        onGoPress: function () {
+            let similarityThreshold = parseInt(this._view.byId("percentageInput").getValue(), 10);
+            if (isNaN(similarityThreshold) || similarityThreshold < 0 || similarityThreshold > 100) {
+                MessageBox.error("Please enter a valid percentage between 0 and 100.");
+                return;
+            }
+            this.applySimilarityMatching(similarityThreshold);
+            //MessageToast.show(`Match groups updated with ${similarityThreshold}% similarity.`);
         },
 
         applySimilarityMatching: function (similarityThreshold) {
-            sap.ui.core.BusyIndicator.show(0);    
+            sap.ui.core.BusyIndicator.show(0);
             var opsData = JSON.parse(JSON.stringify(currNodeData));
-            if (typeof opsData != "undefined" && (typeof opsData.suspects != "undefined")) {
+            if (typeof opsData != "undefined") {
                 var suspects = opsData.suspects;
-                suspects.sort((s1, s2) => (s1.StreetAdd.length > s2.StreetAdd.length) ? 1 : -1);
                 let alternateSuspects = [];
-                var similarityCtr = 0;
+                var groupCounter = 0;
         
                 while (suspects.length > 0) {
                     for (let i = 0; i < suspects.length; i++) {
                         const s = suspects[i];
                         if (i == 0) {
                             s.Duplicate = false;
-                            similarityCtr++;
-                            s.MatchGroup = "P_" + similarityThreshold + "_" + similarityCtr;
+                            groupCounter++;
+                            s.MatchGroup = "P_" + similarityThreshold + "_" + groupCounter;
                             alternateSuspects.push(s);
                         } else {
+                            console.log("Comparing StreetAdd:");
+                            console.log("StreetAdd 1:", suspects[0].StreetAdd);
+                            console.log("StreetAdd 2:", s.StreetAdd);
+        
                             // Compare only StreetAdd for similarity
                             let similarity = _cref.calculateAddressSimilarity(suspects[0].StreetAdd, s.StreetAdd);
+                            console.log("Similarity Score:", similarity);
+        
                             if (similarity >= similarityThreshold) {
-                                s.MatchGroup = "P_" + similarityThreshold + "_" + similarityCtr;
+                                s.MatchGroup = "P_" + similarityThreshold + "_" + groupCounter;
                                 s.Duplicate = true;
                                 alternateSuspects.push(s);
                             }
@@ -198,11 +209,11 @@ sap.ui.define([
                     suspects = suspects.filter(e => !alternateSuspects.some(s => s.CustomerId === e.CustomerId));
                 }
                 // Update the model with the matched suspects
-                _v.getModel("details").setProperty("/selectedSuspects", alternateSuspects);
+                this._view.getModel("details").setProperty("/selectedSuspects", alternateSuspects);
                 sap.ui.core.BusyIndicator.hide();
-            } 
-            sap.ui.core.BusyIndicator.hide();
-            _v.getModel("vcfg").refresh(true);
+            } else {
+                // Handle the case where opsData is undefined
+            }
         },
         onCustomerPage: function () {
             var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
@@ -214,7 +225,8 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
                 oRouter.navTo("VendorListing");
             }, 1000);
-        }
+        },
+        
 
 
     });

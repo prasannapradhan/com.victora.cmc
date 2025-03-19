@@ -22,26 +22,17 @@
                             </items>
                         </Select>
                         
-                        <Text class="sapUiTinyMarginBegin sapUiTinyMarginEnd" 
-                            text="{vcfg>/groupCountText}" width="auto" />
-
-                        <Text class="sapUiTinyMarginBegin sapUiTinyMarginEnd" 
-                            text="{vcfg>/customerCountText}" width="auto" />
-                        
-                        <Input 
-                            width="4rem" 
-                            value="{vcfg>/threshold}"
-                            type="Text"
-                            change="handleCustomerThresholdChange"
-                            />
-                        <Button 
-                            text="Apply" 
-                            press="handleCustomerThresholdChange" 
-                            type="Emphasized"
-                            />
+                
+                  
+                        <!-- Input Field for Percentage -->
+                        <Input id="percentageInput" placeholder="Enter %"  width="10rem"/>
+                    
+                        <!-- Go Button -->
+                        <Button text="Go" press="onGoPress"  class="myCustomButton"/>
+                    
                         <ToolbarSpacer/>
-                        <Button text="Vendor" press="onCustomerPage" type="Emphasized"/>
-
+                    
+                        <Button text="Vendor" press="onCustomerPage" class="myCustomButton"/>
                     </Toolbar>
                 
                     <FlexBox

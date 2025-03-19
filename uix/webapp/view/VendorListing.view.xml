@@ -19,11 +19,23 @@
                         <core:Item key="International" text="International"/>
                         </items>
                         </Select>
-                        <Input id="vendorPercentageInput" class="Percentage" placeholder="Enter %" width="10rem"/>
+                        <Input
+                        id="vendorPercentageInput"
+                        value="{details>/similarityThreshold}"
+                        liveChange="onLiveChange"
+                        submit="onGoPress"
+                        class="Percentage"
+                        placeholder="Enter %"
+                        width="10rem"
+                    />
                         <!--  Go Button  -->
-                        <Button text="Go" press="onGoPress" class="myCustomButton"/>
+                        <Button  text="Search %"
+                        type="Emphasized"
+                        icon="sap-icon://search"
+                        class="sapUiSmallMarginBegin"
+                         press="onGoPress"/>
                         <ToolbarSpacer/>
-                        <Button text="Customer" press="onVendorPage" class="myCustomButton"/>
+                        <Button text="Customer"  type="Emphasized" press="onVendorPage" class="myCustomButton"/>
                         </Toolbar>
 
                     <FlexBox

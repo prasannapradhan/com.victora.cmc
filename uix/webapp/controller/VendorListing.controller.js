@@ -116,6 +116,8 @@ sap.ui.define([
             this.updateSuspectList(oEvent.getParameter("selectedItem").getKey());
         },
 
+    
+        
         onGoPress: function () {
             let similarityThreshold = parseInt(this._view.byId("vendorPercentageInput").getValue(), 10);
             if (isNaN(similarityThreshold) || similarityThreshold < 0 || similarityThreshold > 100) {
@@ -124,6 +126,7 @@ sap.ui.define([
             }
             this.applySimilarityMatching(similarityThreshold);
         },
+
 
         applySimilarityMatching: function (similarityThreshold) {
             sap.ui.core.BusyIndicator.show(0);    
@@ -154,6 +157,8 @@ sap.ui.define([
                     suspects = suspects.filter(e => !alternateSuspects.some(s => s.VendorId === e.VendorId));
                     //console.log(suspects);
                 }
+
+                this._view.getModel("details").setProperty("/similarityThreshold", similarityThreshold);
                 //console.log(alternateSuspects);
                 this._view.getModel("details").setProperty("/selectedSuspects", alternateSuspects);
                 sap.ui.core.BusyIndicator.hide();
@@ -169,6 +174,9 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
                 oRouter.navTo("CustomerListing");
             }, 1000);
-        }
+        },
+
+       
+        
     });
 });
