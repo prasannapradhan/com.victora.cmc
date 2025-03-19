@@ -9,19 +9,20 @@ sap.ui.define([
     ],
     function (UIComponent, models, __gu) {
         "use strict";
+        var _cref = {};
 
         return UIComponent.extend("com.victora.cmc.uix.Component", {
             metadata: {
                 interfaces: ["sap.ui.core.IAsyncContentCreation"],
                 manifest: "json"
             },
-    
             /**
              * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
              * @public
              * @override
              */
             init: function () {
+                _cref = this;
                 // call the base component's init function
                 UIComponent.prototype.init.apply(this, arguments);
                 // set the device model
@@ -42,7 +43,7 @@ sap.ui.define([
                         'https://unpkg.com/xlsx/dist/xlsx.full.min.js');
                     document.head.appendChild(xlsx);
 
-                    this.getRouter().navTo("CustomerListing");
+                    _cref.getRouter().navTo("CustomerListing");
                     console.log("Routed to main view");
                 }
             }
