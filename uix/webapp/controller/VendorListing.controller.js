@@ -219,80 +219,101 @@ sap.ui.define([
         },
 
         downloadAllSuspects: function () {
-            let allData = [];
-
-            // Get the current filter type from the model or UI
-            let filterType = _v.getModel("vcfg").getProperty("/filterType") || "All"; // Default to "All" if not set
-
-            // Apply similarity matching to all groups in _allSuspectData
-            this._allSuspectData.forEach(group => {
-                this.applySimilarityMatching(_cfg.threshold, group); // Apply matching to each group
-            });
-            this._allSuspectData.forEach(group => {
-                // Check if the group matches the current filter
-                if (
-                    filterType === "All" ||
-                    (filterType === "National" && group.country.startsWith("IN")) ||
-                    (filterType === "International" && !group.country.startsWith("IN"))
-                ) {
-                    // Process and log the data
-                    group.suspects.forEach(suspect => {
-                        let data = {
-                            "Key": group.key,
-                            "Country": group.country,
-                            "Tax ID": suspect.TaxId,
-                            "Pincode": suspect.Pincode,
-                            "Match (%)": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
-                            "Address": suspect.Address,
-                            "Vendor ID": suspect.VendorId,
-                            "Name": suspect.Name,
-                            "Region": suspect.Region
-                        };
-                        allData.push(data);
-                    });
-                }
-
-            });
-
-            var filename = "Vendor_data-Export.xlsx";
-            var wb = XLSX.utils.book_new();
-
-            // Define the header data
-            var headerData = [
-                ["Key", "Country", "Tax ID", "Pincode", "Match (%)", "Address", "Vendor ID", "Name", "Region"]
-            ];
-
-            // Add the data rows to the headerData array
-            allData.forEach(item => {
-                headerData.push([
-                    item["Key"],
-                    item["Country"],
-                    item["Tax ID"],
-                    item["Pincode"],
-                    item["Match (%)"],
-                    item["Address"],
-                    item["Vendor ID"],
-                    item["Name"],
-                    item["Region"]
-                ]);
-            });
-            // Convert the headerData array to a worksheet
-            var wsh = XLSX.utils.aoa_to_sheet(headerData);
-
-            // Append the worksheet to the workbook
-            XLSX.utils.book_append_sheet(wb, wsh, 'header-info');
-
-            // Export the workbook to an Excel file
-            XLSX.writeFile(wb, filename);
-
-            MessageToast.show(`Vendor data (${filterType}) has been exported to ${filename}`);
+            // Show Busy Indicator
+            sap.ui.core.BusyIndicator.show(0);
+        
+            // Simulate a delay for testing
+            setTimeout(() => {
+                let allData = [];
+        
+                // Get the current filter type from the model or UI
+                let filterType = _v.getModel("vcfg").getProperty("/filterType") || "All"; // Default to "All" if not set
+        
+                // Apply similarity matching to all groups in _allSuspectData
+                this._allSuspectData.forEach(group => {
+                    this.applySimilarityMatching(_cfg.threshold, group); // Apply matching to each group
+                });
+        
+                // Process and prepare the data for export based on the current filter
+                this._allSuspectData.forEach(group => {
+                    // Check if the group matches the current filter
+                    if (
+                        filterType === "All" ||
+                        (filterType === "National" && group.country.startsWith("IN")) ||
+                        (filterType === "International" && !group.country.startsWith("IN"))
+                    ) {
+                        // Process and log the data
+                        group.suspects.forEach(suspect => {
+                            let data = {
+                                "Key": group.key,
+                                "Country": group.country,
+                                "Tax ID": suspect.TaxId,
+                                "Pincode": suspect.Pincode,
+                                "Match (%)": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
+                                "Address": suspect.Address,
+                                "Vendor ID": suspect.VendorId,
+                                "Name": suspect.Name,
+                                "Region": suspect.Region
+                            };
+                            allData.push(data);
+                        });
+                    }
+                });
+        
+                // Define the filename
+                var filename = "Vendor_data-Export.xlsx";
+        
+                // Create a new workbook
+                var wb = XLSX.utils.book_new();
+        
+                // Define the header data
+                var headerData = [
+                    ["Key", "Match (%)", "Vendor ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
+                ];
+        
+                // Add the data rows to the headerData array
+                allData.forEach(item => {
+                    headerData.push([
+                        item["Key"],
+                        item["Match (%)"],
+                        item["Vendor ID"],
+                        item["Name"],
+                        item["Address"],
+                        item["Country"],
+                        item["Tax ID"],
+                        item["Pincode"],
+                        item["Region"]
+                    ]);
+                });
+        
+                // Convert the headerData array to a worksheet
+                var wsh = XLSX.utils.aoa_to_sheet(headerData);
+        
+                // Append the worksheet to the workbook
+                XLSX.utils.book_append_sheet(wb, wsh, 'header-info');
+        
+                // Export the workbook to an Excel file
+                XLSX.writeFile(wb, filename);
+        
+                // Hide Busy Indicator after download is complete
+                sap.ui.core.BusyIndicator.hide();
+        
+                MessageToast.show(`Vendor data (${filterType}) has been exported to ${filename}`);
+            }, 1000); // Simulate a 1-second delay
         },
 
         downloadGroupData: function () {
+
+            sap.ui.core.BusyIndicator.show(0);
+
+            
+            // Simulate a delay for testing
+            setTimeout(() => {
             // Get the selected key from the table (assuming it's stored in the model)
             let selectedKey = _v.getModel("cmc").getProperty("/selectedKey");
 
             if (!selectedKey) {
+                sap.ui.core.BusyIndicator.hide();
                 MessageToast.show("Please select a group to download.");
                 return;
             }
@@ -301,6 +322,7 @@ sap.ui.define([
             let selectedGroup = this._allSuspectData.find(group => group.key === selectedKey);
 
             if (!selectedGroup) {
+                sap.ui.core.BusyIndicator.hide();
                 MessageToast.show("No data found for the selected group.");
                 return;
             }
@@ -326,26 +348,26 @@ sap.ui.define([
             });
 
             // Define the filename
-            var filename = "Group-Export.xlsx";
+            var filename = "Vendor-Group-Export.xlsx";
 
             // Create a new workbook
             var wb = XLSX.utils.book_new();
             // Define the header data
             var headerData = [
-                ["Key", "Country", "Tax ID", "Pincode", "Match (%)", "Address", "Vendor ID", "Name", "Region"]
+                ["Match (%)","Vendor ID", "Name", "Address", "Country", "Tax ID", "Pincode",    "Region"]
             ];
             // Add the data rows to the headerData array
             groupData.forEach(item => {
                 headerData.push([
-                    item["Key"],
+                    item["Match (%)"],
+                    item["Vendor ID"],
+                    item["Name"],
+                    item["Address"],
                     item["Country"],
                     item["Tax ID"],
                     item["Pincode"],
-                    item["Match (%)"],
-                    item["Address"],
-                    item["Vendor ID"],
-                    item["Name"],
                     item["Region"]
+                    
                 ]);
             });
 
@@ -356,8 +378,10 @@ sap.ui.define([
 
             // Export the workbook to an Excel file
             XLSX.writeFile(wb, filename);
+            sap.ui.core.BusyIndicator.hide();
 
             MessageToast.show("Group data has been exported to " + filename);
+        }, 1000);
         },
 
         formatMatchGroupState: function (matchGroup) {
