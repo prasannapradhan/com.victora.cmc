@@ -160,7 +160,9 @@ sap.ui.define([
         },
 
         onFilterChange: function (oEvent) {
-            this.updateSuspectList(oEvent.getParameter("selectedItem").getKey());
+            let filterType = oEvent.getParameter("selectedItem").getKey();
+            _v.getModel("vcfg").setProperty("/filterType", filterType); // Store the filter type in the model
+            this.updateSuspectList(filterType);
         },
 
         handleVendorThresholdChange: function () {
@@ -220,34 +222,71 @@ sap.ui.define([
         downloadAllSuspects: function () {
             let allData = [];
 
+            // Get the current filter type from the model or UI
+            let filterType = _v.getModel("vcfg").getProperty("/filterType") || "All"; // Default to "All" if not set
+
             // Apply similarity matching to all groups in _allSuspectData
             this._allSuspectData.forEach(group => {
                 this.applySimilarityMatching(_cfg.threshold, group); // Apply matching to each group
             });
-
-            // Process and log the data
             this._allSuspectData.forEach(group => {
-                group.suspects.forEach(suspect => {
-                    let data = {
-                        "Key": group.key,
-                        "Country": group.country,
-                        "Tax ID": suspect.TaxId,
-                        "Pincode": suspect.Pincode,
-                        "Match (%)": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
-                        "Address": suspect.Address,
-                        "Vendor ID": suspect.VendorId,
-                        "Name": suspect.Name,
-                        "Region": suspect.Region
-                    };
-                    allData.push(data);
-                });
+                // Check if the group matches the current filter
+                if (
+                    filterType === "All" ||
+                    (filterType === "National" && group.country.startsWith("IN")) ||
+                    (filterType === "International" && !group.country.startsWith("IN"))
+                ) {
+                    // Process and log the data
+                    group.suspects.forEach(suspect => {
+                        let data = {
+                            "Key": group.key,
+                            "Country": group.country,
+                            "Tax ID": suspect.TaxId,
+                            "Pincode": suspect.Pincode,
+                            "Match (%)": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
+                            "Address": suspect.Address,
+                            "Vendor ID": suspect.VendorId,
+                            "Name": suspect.Name,
+                            "Region": suspect.Region
+                        };
+                        allData.push(data);
+                    });
+                }
+
             });
 
-            // Log the data in a tabular format
-            console.table(allData);
+            var filename = "Vendor_data-Export.xlsx";
+            var wb = XLSX.utils.book_new();
 
+            // Define the header data
+            var headerData = [
+                ["Key", "Country", "Tax ID", "Pincode", "Match (%)", "Address", "Vendor ID", "Name", "Region"]
+            ];
 
-            MessageToast.show("All data has been logged to the console.");
+            // Add the data rows to the headerData array
+            allData.forEach(item => {
+                headerData.push([
+                    item["Key"],
+                    item["Country"],
+                    item["Tax ID"],
+                    item["Pincode"],
+                    item["Match (%)"],
+                    item["Address"],
+                    item["Vendor ID"],
+                    item["Name"],
+                    item["Region"]
+                ]);
+            });
+            // Convert the headerData array to a worksheet
+            var wsh = XLSX.utils.aoa_to_sheet(headerData);
+
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(wb, wsh, 'header-info');
+
+            // Export the workbook to an Excel file
+            XLSX.writeFile(wb, filename);
+
+            MessageToast.show(`Vendor data (${filterType}) has been exported to ${filename}`);
         },
 
         downloadGroupData: function () {
@@ -278,7 +317,7 @@ sap.ui.define([
                     "Country": selectedGroup.country,
                     "Tax ID": suspect.TaxId,
                     "Pincode": suspect.Pincode,
-                    "Match (%)": suspect.MatchGroup || "N/A", 
+                    "Match (%)": suspect.MatchGroup || "N/A",
                     "Address": suspect.Address,
                     "Vendor ID": suspect.VendorId,
                     "Name": suspect.Name,
@@ -287,10 +326,39 @@ sap.ui.define([
                 groupData.push(data);
             });
 
-            // Log the data in a tabular format
-            console.table(groupData);
+            // Define the filename
+            var filename = "Group-Export.xlsx";
 
-            MessageToast.show("Group data has been logged to the console.");
+            // Create a new workbook
+            var wb = XLSX.utils.book_new();
+            // Define the header data
+            var headerData = [
+                ["Key", "Country", "Tax ID", "Pincode", "Match (%)", "Address", "Vendor ID", "Name", "Region"]
+            ];
+            // Add the data rows to the headerData array
+            groupData.forEach(item => {
+                headerData.push([
+                    item["Key"],
+                    item["Country"],
+                    item["Tax ID"],
+                    item["Pincode"],
+                    item["Match (%)"],
+                    item["Address"],
+                    item["Vendor ID"],
+                    item["Name"],
+                    item["Region"]
+                ]);
+            });
+
+            var wsh = XLSX.utils.aoa_to_sheet(headerData);
+
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(wb, wsh, 'Group Data');
+
+            // Export the workbook to an Excel file
+            XLSX.writeFile(wb, filename);
+
+            MessageToast.show("Group data has been exported to " + filename);
         },
 
         formatMatchGroupState: function (matchGroup) {

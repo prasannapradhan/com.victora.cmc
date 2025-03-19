@@ -6,10 +6,10 @@ sap.ui.define([
     "sap/m/MessageToast"
 ], function (Controller, JSONModel, GeneralUtils, MessageBox, MessageToast) {
     "use strict";
-    
+
     var _cref = {};
     var _v = {};
-    
+
     var currNodeData = {};
     var __defaultSimilarity = 95;
     var _cfg = {};
@@ -28,7 +28,7 @@ sap.ui.define([
             _cfg.interNationalCustomerCnt = 0;
             _cfg.totalCustomerCnt = 0;
 
-            _v.setModel(new JSONModel({selectedSuspects: [],similarityThreshold: _cfg.threshold}), "details");
+            _v.setModel(new JSONModel({ selectedSuspects: [], similarityThreshold: _cfg.threshold }), "details");
             _v.setModel(new JSONModel(_cfg), "vcfg")
             this.showCustomerListing();
         },
@@ -52,10 +52,10 @@ sap.ui.define([
                 // Clean up StreetAdd, City, and District for display
                 e.Name = e.Name.replace(/[^a-zA-Z0-9]/g, " ").trim().replace(/\s+/g, " ");
                 e.StreetAdd = e.StreetAdd.replace(/[^a-zA-Z0-9]/g, " ").trim().replace(/\s+/g, " ").toLowerCase();
-        
+
                 // Construct Address for display only (not for comparison)
                 e.Address = [e.StreetAdd, e.City, e.District].filter(Boolean).join(", ").toLowerCase();
-        
+
                 // Group data by Country, TaxId, and Pincode/City
                 if (!countryMap[e.Country]) countryMap[e.Country] = {};
                 if (!countryMap[e.Country][e.TaxId]) countryMap[e.Country][e.TaxId] = {};
@@ -79,13 +79,13 @@ sap.ui.define([
                     )
                 )
             );
-            _cfg.groupCountText = "Groups: " + Object.keys( _cref._allSuspectData).length
+            _cfg.groupCountText = "Groups: " + Object.keys(_cref._allSuspectData).length
             var svals = Object.values(_cref._allSuspectData);
             for (let i = 0; i < svals.length; i++) {
                 const elem = svals[i];
-                if(elem.country == "IN"){
+                if (elem.country == "IN") {
                     _cfg.nationalCustomerCnt += elem.suspects.length;
-                }else {
+                } else {
                     _cfg.interNationalCustomerCnt += elem.suspects.length;
                 }
             }
@@ -98,13 +98,13 @@ sap.ui.define([
                     filterType === "International" ? !item.country.startsWith("IN") : true
             );
             _cfg.groupCountText = "Groups: " + Object.keys(filteredData).length
-            if(filterType == "National"){
+            if (filterType == "National") {
                 _cfg.totalCustomerCnt = _cfg.nationalCustomerCnt;
                 _cfg.customerCountText = "Customers: " + _cfg.totalCustomerCnt;
-            }else if (filterType == "International"){
+            } else if (filterType == "International") {
                 _cfg.totalCustomerCnt = _cfg.interNationalCustomerCnt;
                 _cfg.customerCountText = "Customers: " + _cfg.totalCustomerCnt;
-            }else {
+            } else {
                 _cfg.totalCustomerCnt = _cfg.nationalCustomerCnt + _cfg.interNationalCustomerCnt;
                 _cfg.customerCountText = "Customers: " + _cfg.totalCustomerCnt;
             }
@@ -126,7 +126,7 @@ sap.ui.define([
 
         calculateAddressSimilarity: function (addr1, addr2) {
             if (!addr1 || !addr2) return 0;
-        
+
             // Ensure addr1 is always the shorter string
             if (addr1.length > addr2.length) {
                 [addr1, addr2] = [addr2, addr1]; // Swap to maintain order
@@ -137,7 +137,7 @@ sap.ui.define([
             }
             let tokens1 = addr1.split(/\s+/);
             let tokens2 = addr2.split(/\s+/);
-        
+
             let allTokensMatch = tokens1.every(token => tokens2.includes(token));
             if (allTokensMatch) {
                 return 100; // All tokens of the shorter address are present in the longer address
@@ -146,7 +146,7 @@ sap.ui.define([
             let maxLength = addr2.length;
             let distance = this.calculateLevenshteinDistance(addr1, addr2);
             let similarityScore = ((maxLength - distance) / maxLength) * 100;
-        
+
             return similarityScore.toFixed(2);
         },
 
@@ -161,22 +161,24 @@ sap.ui.define([
         },
 
         onFilterChange: function (oEvent) {
-            this.updateSuspectList(oEvent.getParameter("selectedItem").getKey());
+            let filterType = oEvent.getParameter("selectedItem").getKey();
+            _v.getModel("vcfg").setProperty("/filterType", filterType); // Store the filter type in the model
+            this.updateSuspectList(filterType);
         },
 
         handleCustomerThresholdChange: function () {
             this.applySimilarityMatching(parseInt(_cfg.threshold));
         },
 
-        applySimilarityMatching: function (similarityThreshold ,group) {
-            sap.ui.core.BusyIndicator.show(0);    
+        applySimilarityMatching: function (similarityThreshold, group) {
+            sap.ui.core.BusyIndicator.show(0);
             var opsData = group || currNodeData;
             if (typeof opsData != "undefined" && (typeof opsData.suspects != "undefined")) {
                 var suspects = opsData.suspects;
                 suspects.sort((s1, s2) => (s1.StreetAdd.length > s2.StreetAdd.length) ? 1 : -1);
                 let alternateSuspects = [];
                 var similarityCtr = 0;
-        
+
                 while (suspects.length > 0) {
                     for (let i = 0; i < suspects.length; i++) {
                         const s = suspects[i];
@@ -201,7 +203,7 @@ sap.ui.define([
                 // Update the model with the matched suspects
                 _v.getModel("details").setProperty("/selectedSuspects", alternateSuspects);
                 sap.ui.core.BusyIndicator.hide();
-            } 
+            }
             sap.ui.core.BusyIndicator.hide();
             _v.getModel("vcfg").refresh(true);
         },
@@ -217,78 +219,99 @@ sap.ui.define([
             }, 1000);
         },
 
-        downloadAllSuspects: function() {
+        downloadAllSuspects: function () {
             let allData = [];
-        
+
+            // Get the current filter type from the model or UI
+            let filterType = _v.getModel("vcfg").getProperty("/filterType") || "All"; // Default to "All" if not set
+
             // Apply similarity matching to all groups in _allSuspectData
             this._allSuspectData.forEach(group => {
                 this.applySimilarityMatching(_cfg.threshold, group); // Apply matching to each group
             });
-        
-            // Process and log the data
-            this._allSuspectData.forEach(group => {
-                group.suspects.forEach(suspect => {
-                    let data = {
-                        "Key": group.key,
-                        "Country": group.country,
-                        "Tax ID": suspect.TaxId,
-                        "Pincode": suspect.Pincode,
-                        "Match (%)": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
-                        "Address": suspect.Address,
-                        "Customer ID": suspect.CustomerId,
-                        "Name": suspect.Name,
-                        "Region": suspect.Region
-                    };
-                    allData.push(data);
-                });
-            });
-        
-            // Log the data in a tabular format
-            console.table(allData);
-        
-            // Optionally, log the data as key-value pairs
-            
-            /**
-                _c.Filename = "Composition-Export.xlsx";
-                var wb = XLSX.utils.book_new();
-                var headerData = [
-                    [ "ID", "Customer", "Material", "Layers", "Resins", "Colors", "ColorIncluded", "ScrapPercentage" ]
-                ];
-                var guidMap = {};
-                for (let i = 0; i < recs.length; i++) {
-                    const ho = recs[i];
-                    const hd = [ho.ID, ho.Customer, ho.Material, ho.Layers, ho.Resins, ho.Colors, ho.ColorIncluded, ho.ScrapPercentage];
-                    guidMap[ho.ID] = ho.Guid;
-                    headerData.push(hd);
-                }
-                var wsh = XLSX.utils.aoa_to_sheet(headerData);
-                XLSX.utils.book_append_sheet(wb, wsh, 'header-info');
-              
-             */
-        
-            MessageToast.show("All data has been logged to the console.");
-        },
 
-        downloadGroupData: function() {
+            // Process and prepare the data for export based on the current filter
+            this._allSuspectData.forEach(group => {
+                // Check if the group matches the current filter
+                if (
+                    filterType === "All" ||
+                    (filterType === "National" && group.country.startsWith("IN")) ||
+                    (filterType === "International" && !group.country.startsWith("IN"))
+                ) {
+                    group.suspects.forEach(suspect => {
+                        let data = {
+                            "Key": group.key,
+                            "Country": group.country,
+                            "Tax ID": suspect.TaxId,
+                            "Pincode": suspect.Pincode,
+                            "Match (%)": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
+                            "Address": suspect.Address,
+                            "Customer ID": suspect.CustomerId,
+                            "Name": suspect.Name,
+                            "Region": suspect.Region
+                        };
+                        allData.push(data);
+                    });
+                }
+            });
+
+            // Define the filename
+            var filename = "Composition-Export.xlsx";
+
+            // Create a new workbook
+            var wb = XLSX.utils.book_new();
+
+            // Define the header data
+            var headerData = [
+                ["Key", "Country", "Tax ID", "Pincode", "Match (%)", "Address", "Customer ID", "Name", "Region"]
+            ];
+
+            // Add the data rows to the headerData array
+            allData.forEach(item => {
+                headerData.push([
+                    item["Key"],
+                    item["Country"],
+                    item["Tax ID"],
+                    item["Pincode"],
+                    item["Match (%)"],
+                    item["Address"],
+                    item["Customer ID"],
+                    item["Name"],
+                    item["Region"]
+                ]);
+            });
+
+            // Convert the headerData array to a worksheet
+            var wsh = XLSX.utils.aoa_to_sheet(headerData);
+
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(wb, wsh, 'header-info');
+
+            // Export the workbook to an Excel file
+            XLSX.writeFile(wb, filename);
+
+            MessageToast.show(`Customer data (${filterType}) has been exported to ${filename}`);
+        },
+        downloadGroupData: function () {
             // Get the selected key from the table (assuming it's stored in the model)
             let selectedKey = _v.getModel("cmc").getProperty("/selectedKey");
-            
+
             if (!selectedKey) {
                 MessageToast.show("Please select a group to download.");
                 return;
             }
-        
+
             // Find the group data for the selected key
             let selectedGroup = this._allSuspectData.find(group => group.key === selectedKey);
-            
+
             if (!selectedGroup) {
                 MessageToast.show("No data found for the selected group.");
                 return;
             }
-        
+
             // Apply similarity matching to the selected group
             this.applySimilarityMatching(_cfg.threshold, selectedGroup);
-        
+
             // Prepare the data for the selected group
             let groupData = [];
             selectedGroup.suspects.forEach(suspect => {
@@ -305,23 +328,52 @@ sap.ui.define([
                 };
                 groupData.push(data);
             });
-        
-            // Log the data in a tabular format
-            console.table(groupData);
-        
-           
-        
-            MessageToast.show("Group data has been logged to the console.");
-        },
 
-        formatMatchGroupState: function(matchGroup) {
+            // Define the filename
+            var filename = "Group-Export.xlsx";
+
+            // Create a new workbook
+            var wb = XLSX.utils.book_new();
+
+            // Define the header data
+            var headerData = [
+                ["Key", "Country", "Tax ID", "Pincode", "Match (%)", "Address", "Customer ID", "Name", "Region"]
+            ];
+
+            // Add the data rows to the headerData array
+            groupData.forEach(item => {
+                headerData.push([
+                    item["Key"],
+                    item["Country"],
+                    item["Tax ID"],
+                    item["Pincode"],
+                    item["Match (%)"],
+                    item["Address"],
+                    item["Customer ID"],
+                    item["Name"],
+                    item["Region"]
+                ]);
+            });
+
+            // Convert the headerData array to a worksheet
+            var wsh = XLSX.utils.aoa_to_sheet(headerData);
+
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(wb, wsh, 'Group Data');
+
+            // Export the workbook to an Excel file
+            XLSX.writeFile(wb, filename);
+
+            MessageToast.show("Group data has been exported to " + filename);
+        },
+        formatMatchGroupState: function (matchGroup) {
             if (!matchGroup) return "None"; // No color if no match group
-        
+
             // Extract the similarity threshold and group number from the MatchGroup value
             let matchParts = matchGroup.split("_");
             if (matchParts.length >= 3) {
                 let groupNumber = matchParts[2]; // Get the group number (e.g., 1, 2, 3, etc.)
-                
+
                 // Assign different states (colors) based on the group number
                 switch (groupNumber % 5) { // Use modulo to cycle through 5 colors
                     case 1: return "Success"; // Green
@@ -333,6 +385,7 @@ sap.ui.define([
                 }
             }
             return "None"; // Default no color
-        }
+        },
+
     });
 });
