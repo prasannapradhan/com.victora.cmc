@@ -221,151 +221,172 @@ sap.ui.define([
         },
 
         downloadAllCustomers: function () {
-            let allData = [];
-
-            // Get the current filter type from the model or UI
-            let filterType = _v.getModel("vcfg").getProperty("/filterType") || "All"; // Default to "All" if not set
-
-            // Apply similarity matching to all groups in _allSuspectData
-            this._allSuspectData.forEach(group => {
-                this.applySimilarityMatching(_cfg.threshold, group); // Apply matching to each group
-            });
-
-            // Process and prepare the data for export based on the current filter
-            this._allSuspectData.forEach(group => {
-                // Check if the group matches the current filter
-                if (
-                    filterType === "All" ||
-                    (filterType === "National" && group.country.startsWith("IN")) ||
-                    (filterType === "International" && !group.country.startsWith("IN"))
-                ) {
-                    group.suspects.forEach(suspect => {
-                        let data = {
-                            "Key": group.key,
-                            "Country": group.country,
-                            "Tax ID": suspect.TaxId,
-                            "Pincode": suspect.Pincode,
-                            "Match Group": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
-                            "Address": suspect.Address,
-                            "Customer ID": suspect.CustomerId,
-                            "Name": suspect.Name,
-                            "Region": suspect.Region
-                        };
-                        allData.push(data);
-                    });
-                }
-            });
-
-            // Define the filename
-            var filename = "customer-duplicate-all-export.xlsx";
-
-            // Create a new workbook
-            var wb = XLSX.utils.book_new();
-
-            // Define the header data
-            var headerData = [
-                ["Group Key", "Match Group", "Customer ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
-            ];
-
-            // Add the data rows to the headerData array
-            allData.forEach(item => {
-                headerData.push([
-                    item["Key"],
-                    item["Match Group"],
-                    item["Customer ID"],
-                    item["Name"],
-                    item["Address"],
-                    item["Country"],
-                    item["Tax ID"],
-                    item["Pincode"],
-                    item["Region"]
-                ]);
-            });
-
-            // Convert the headerData array to a worksheet
-            var wsh = XLSX.utils.aoa_to_sheet(headerData);
-
-            // Append the worksheet to the workbook
-            XLSX.utils.book_append_sheet(wb, wsh, 'customerr-duplicates');
-
-            // Export the workbook to an Excel file
-            XLSX.writeFile(wb, filename);
-
-            MessageToast.show(`Customer data (${filterType}) has been exported to ${filename}`);
+            // Show Busy Indicator
+            sap.ui.core.BusyIndicator.show(0);
+        
+            // Simulate a delay for testing
+            setTimeout(() => {
+                let allData = [];
+        
+                // Get the current filter type from the model or UI
+                let filterType = _v.getModel("vcfg").getProperty("/filterType") || "All"; // Default to "All" if not set
+        
+                // Apply similarity matching to all groups in _allSuspectData
+                this._allSuspectData.forEach(group => {
+                    this.applySimilarityMatching(_cfg.threshold, group); // Apply matching to each group
+                });
+        
+                // Process and prepare the data for export based on the current filter
+                this._allSuspectData.forEach(group => {
+                    // Check if the group matches the current filter
+                    if (
+                        filterType === "All" ||
+                        (filterType === "National" && group.country.startsWith("IN")) ||
+                        (filterType === "International" && !group.country.startsWith("IN"))
+                    ) {
+                        group.suspects.forEach(suspect => {
+                            let data = {
+                                "Key": group.key,
+                                "Country": group.country,
+                                "Tax ID": suspect.TaxId,
+                                "Pincode": suspect.Pincode,
+                                "Match Group": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
+                                "Address": suspect.Address,
+                                "Customer ID": suspect.CustomerId,
+                                "Name": suspect.Name,
+                                "Region": suspect.Region
+                            };
+                            allData.push(data);
+                        });
+                    }
+                });
+        
+                // Define the filename
+                var filename = "customer-duplicate-all-export.xlsx";
+        
+                // Create a new workbook
+                var wb = XLSX.utils.book_new();
+        
+                // Define the header data
+                var headerData = [
+                    ["Group Key", "Match Group", "Customer ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
+                ];
+        
+                // Add the data rows to the headerData array
+                allData.forEach(item => {
+                    headerData.push([
+                        item["Key"],
+                        item["Match Group"],
+                        item["Customer ID"],
+                        item["Name"],
+                        item["Address"],
+                        item["Country"],
+                        item["Tax ID"],
+                        item["Pincode"],
+                        item["Region"]
+                    ]);
+                });
+        
+                // Convert the headerData array to a worksheet
+                var wsh = XLSX.utils.aoa_to_sheet(headerData);
+        
+                // Append the worksheet to the workbook
+                XLSX.utils.book_append_sheet(wb, wsh, 'customerr-duplicates');
+        
+                // Export the workbook to an Excel file
+                XLSX.writeFile(wb, filename);
+        
+                // Hide Busy Indicator after download is complete
+                sap.ui.core.BusyIndicator.hide();
+        
+                MessageToast.show(`Customer data (${filterType}) has been exported to ${filename}`);
+            }, 1000); // Simulate a 1-second delay
         },
-
         downloadGroupCustomers: function () {
-            // Get the selected key from the table (assuming it's stored in the model)
-            let selectedKey = _v.getModel("cmc").getProperty("/selectedKey");
-
-            if (!selectedKey) {
-                MessageToast.show("Please select a group to download.");
-                return;
-            }
-
-            // Find the group data for the selected key
-            let selectedGroup = this._allSuspectData.find(group => group.key === selectedKey);
-
-            if (!selectedGroup) {
-                MessageToast.show("No data found for the selected group.");
-                return;
-            }
-
-            // Apply similarity matching to the selected group
-            this.applySimilarityMatching(_cfg.threshold, selectedGroup);
-
-            // Prepare the data for the selected group
-            let groupData = [];
-            selectedGroup.suspects.forEach(suspect => {
-                let data = {
-                    "Key": selectedGroup.key,
-                    "Country": selectedGroup.country,
-                    "Tax ID": suspect.TaxId,
-                    "Pincode": suspect.Pincode,
-                    "Match Group": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
-                    "Address": suspect.Address,
-                    "Customer ID": suspect.CustomerId,
-                    "Name": suspect.Name,
-                    "Region": suspect.Region
-                };
-                groupData.push(data);
-            });
-
-            // Define the filename
-            var filename = "customer-duplicate-group-export.xlsx";
-
-            // Create a new workbook
-            var wb = XLSX.utils.book_new();
-
-            // Define the header data
-            var headerData = [
-                ["Match Group", "Customer ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
-            ];
-
-            // Add the data rows to the headerData array
-            groupData.forEach(item => {
-                headerData.push([
-                    item["Match Group"],
-                    item["Customer ID"],
-                    item["Name"],
-                    item["Address"],
-                    item["Country"],
-                    item["Tax ID"],
-                    item["Pincode"],
-                    item["Region"]
-                ]);
-            });
-
-            // Convert the headerData array to a worksheet
-            var wsh = XLSX.utils.aoa_to_sheet(headerData);
-
-            // Append the worksheet to the workbook
-            XLSX.utils.book_append_sheet(wb, wsh, selectedKey);
-
-            // Export the workbook to an Excel file
-            XLSX.writeFile(wb, filename);
-
-            MessageToast.show("Group data has been exported to " + filename);
+            // Show Busy Indicator
+            sap.ui.core.BusyIndicator.show(0);
+        
+            // Simulate a delay for testing
+            setTimeout(() => {
+                // Get the selected key from the table (assuming it's stored in the model)
+                let selectedKey = _v.getModel("cmc").getProperty("/selectedKey");
+        
+                if (!selectedKey) {
+                    // Hide Busy Indicator if no key is selected
+                    sap.ui.core.BusyIndicator.hide();
+                    MessageToast.show("Please select a group to download.");
+                    return;
+                }
+        
+                // Find the group data for the selected key
+                let selectedGroup = this._allSuspectData.find(group => group.key === selectedKey);
+        
+                if (!selectedGroup) {
+                    // Hide Busy Indicator if no group is found
+                    sap.ui.core.BusyIndicator.hide();
+                    MessageToast.show("No data found for the selected group.");
+                    return;
+                }
+        
+                // Apply similarity matching to the selected group
+                this.applySimilarityMatching(_cfg.threshold, selectedGroup);
+        
+                // Prepare the data for the selected group
+                let groupData = [];
+                selectedGroup.suspects.forEach(suspect => {
+                    let data = {
+                        "Key": selectedGroup.key,
+                        "Country": selectedGroup.country,
+                        "Tax ID": suspect.TaxId,
+                        "Pincode": suspect.Pincode,
+                        "Match Group": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
+                        "Address": suspect.Address,
+                        "Customer ID": suspect.CustomerId,
+                        "Name": suspect.Name,
+                        "Region": suspect.Region
+                    };
+                    groupData.push(data);
+                });
+        
+                // Define the filename
+                var filename = "customer-duplicate-group-export.xlsx";
+        
+                // Create a new workbook
+                var wb = XLSX.utils.book_new();
+        
+                // Define the header data
+                var headerData = [
+                    ["Match Group", "Customer ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
+                ];
+        
+                // Add the data rows to the headerData array
+                groupData.forEach(item => {
+                    headerData.push([
+                        item["Match Group"],
+                        item["Customer ID"],
+                        item["Name"],
+                        item["Address"],
+                        item["Country"],
+                        item["Tax ID"],
+                        item["Pincode"],
+                        item["Region"]
+                    ]);
+                });
+        
+                // Convert the headerData array to a worksheet
+                var wsh = XLSX.utils.aoa_to_sheet(headerData);
+        
+                // Append the worksheet to the workbook
+                XLSX.utils.book_append_sheet(wb, wsh, selectedKey);
+        
+                // Export the workbook to an Excel file
+                XLSX.writeFile(wb, filename);
+        
+                // Hide Busy Indicator after download is complete
+                sap.ui.core.BusyIndicator.hide();
+        
+                MessageToast.show("Group data has been exported to " + filename);
+            }, 1000); // Simulate a 1-second delay
         },
 
         formatMatchGroupState: function (matchGroup) {

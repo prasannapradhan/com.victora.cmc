@@ -87,6 +87,31 @@ sap.ui.define([
                 } else {
                     _cfg.interNationalVendorCnt += elem.suspects.length;
                 }
+                var suspects = JSON.parse(JSON.stringify(elem.suspects));
+                suspects.sort((s1, s2) => (s1.StreetAdd.length > s2.StreetAdd.length) ? 1 : -1);
+                let alternateSuspects = [];
+                var similarityCtr = 0;
+
+                while (suspects.length > 0) {
+                    for (let i = 0; i < suspects.length; i++) {
+                        const s = suspects[i];
+                        if (i == 0) {
+                            s.Duplicate = false;
+                            similarityCtr++;
+                            s.MatchGroup = "P_" + _cfg.threshold + "_" + similarityCtr;
+                            alternateSuspects.push(s);
+                        } else {
+                            let similarity = _cref.calculateAddressSimilarity(suspects[0].StreetAdd, s.StreetAdd);
+                            if (similarity >= _cfg.threshold) {
+                                s.MatchGroup = "P_" + _cfg.threshold + "_" + similarityCtr;
+                                s.Duplicate = true;
+                                alternateSuspects.push(s);
+                            }
+                        }
+                    }
+                    suspects = suspects.filter(e => !alternateSuspects.some(s => s.VendorId === e.VendorId));
+                }
+                elem.suspects = alternateSuspects;
             }
             _cref.updateSuspectList("All");
         },
@@ -174,33 +199,7 @@ sap.ui.define([
             var opsData = group || currNodeData;
             if (typeof opsData != "undefined" && (typeof opsData.suspects != "undefined")) {
                 var suspects = opsData.suspects;
-                suspects.sort((s1, s2) => (s1.StreetAdd.length > s2.StreetAdd.length) ? 1 : -1);
-                let alternateSuspects = [];
-                var similarityCtr = 0;
-
-                while (suspects.length > 0) {
-                    for (let i = 0; i < suspects.length; i++) {
-                        const s = suspects[i];
-                        if (i == 0) {
-                            s.Duplicate = false;
-                            similarityCtr++;
-                            s.MatchGroup = "P_" + similarityThreshold + "_" + similarityCtr;
-                            alternateSuspects.push(s);
-                        } else {
-                            // Compare only StreetAdd for similarity
-                            let similarity = _cref.calculateAddressSimilarity(suspects[0].StreetAdd, s.StreetAdd);
-                            if (similarity >= similarityThreshold) {
-                                s.MatchGroup = "P_" + similarityThreshold + "_" + similarityCtr;
-                                s.Duplicate = true;
-                                alternateSuspects.push(s);
-                            }
-                        }
-                    }
-                    // Remove all the elements from alternate from main
-                    suspects = suspects.filter(e => !alternateSuspects.some(s => s.VendorId === e.VendorId));
-                }
-                // Update the model with the matched suspects
-                _v.getModel("details").setProperty("/selectedSuspects", alternateSuspects);
+                _v.getModel("details").setProperty("/selectedSuspects", suspects);
                 sap.ui.core.BusyIndicator.hide();
             }
             sap.ui.core.BusyIndicator.hide();
