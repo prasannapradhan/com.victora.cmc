@@ -36,7 +36,7 @@ sap.ui.define([
         showCustomerListing: async function () {
             try {
                 let customerModel = new JSONModel();
-                await customerModel.loadData("/model/victora_customer_master.json", false);
+                await customerModel.loadData("model/victora_customer_master.json", false);
                 let customerData = customerModel.getData();
                 GeneralUtils.removeOdataResponseMetadata(customerData);
                 this.processCustomerData(customerData.results || []);

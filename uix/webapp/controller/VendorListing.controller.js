@@ -35,7 +35,7 @@ sap.ui.define([
         showVendorListing: async function () {
             try {
                 let vendorModel = new JSONModel();
-                await vendorModel.loadData("/model/victora_vendor_master.json", false);
+                await vendorModel.loadData("model/victora_vendor_master.json", false);
                 let vendorData = vendorModel.getData();
                 GeneralUtils.removeOdataResponseMetadata(vendorData);
                 this.processVendorData(vendorData.results || []);
