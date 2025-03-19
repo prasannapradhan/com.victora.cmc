@@ -7,21 +7,29 @@ sap.ui.define([
 ], function (Controller, JSONModel, GeneralUtils, MessageBox, MessageToast) {
     "use strict";
     
-    var _cref = this;
+    var _cref = {};
+    var _v = {};
+    
     var currNodeData = {};
+    var __defaultSimilarity = 95;
+    var _cfg = {};
 
     return Controller.extend("com.victora.cmc.uix.controller.CustomerListing", {
         onInit: function () {
             _cref = this;
-            this._view = this.getView();
+            _v = this.getView();
+
             this._allSuspectData = [];
 
-            // Set initial model with default similarity threshold
-            this._view.setModel(new JSONModel({
-                selectedSuspects: [],
-                similarityThreshold: 95 // Default similarity threshold
-            }), "details");
+            _cfg.threshold = __defaultSimilarity;
+            _cfg.groupCountText = "";
+            _cfg.customerCountText = "";
+            _cfg.nationalCustomerCnt = 0;
+            _cfg.interNationalCustomerCnt = 0;
+            _cfg.totalCustomerCnt = 0;
 
+            _v.setModel(new JSONModel({selectedSuspects: [],similarityThreshold: _cfg.threshold}), "details");
+            _v.setModel(new JSONModel(_cfg), "vcfg")
             this.showCustomerListing();
         },
 
@@ -43,10 +51,10 @@ sap.ui.define([
             customerData.forEach(e => {
                 // Clean up StreetAdd, City, and District for display
                 e.Name = e.Name.replace(/[^a-zA-Z0-9]/g, " ").trim().replace(/\s+/g, " ");
-                e.StreetAdd = e.StreetAdd.replace(/[^a-zA-Z0-9]/g, " ").trim().replace(/\s+/g, " ");
+                e.StreetAdd = e.StreetAdd.replace(/[^a-zA-Z0-9]/g, " ").trim().replace(/\s+/g, " ").toLowerCase();
         
                 // Construct Address for display only (not for comparison)
-                e.Address = [e.StreetAdd, e.City, e.District].filter(Boolean).join(", ");
+                e.Address = [e.StreetAdd, e.City, e.District].filter(Boolean).join(", ").toLowerCase();
         
                 // Group data by Country, TaxId, and Pincode/City
                 if (!countryMap[e.Country]) countryMap[e.Country] = {};
@@ -55,12 +63,11 @@ sap.ui.define([
                 if (!countryMap[e.Country][e.TaxId][key]) countryMap[e.Country][e.TaxId][key] = [];
                 countryMap[e.Country][e.TaxId][key].push(e);
             });
-        
             this.constructSuspectMap(countryMap);
         },
 
         constructSuspectMap: function (countryMap) {
-            this._allSuspectData = Object.entries(countryMap).flatMap(([country, taxObj]) =>
+            _cref._allSuspectData = Object.entries(countryMap).flatMap(([country, taxObj]) =>
                 Object.entries(taxObj).flatMap(([tax, pincObj]) =>
                     Object.entries(pincObj).flatMap(([pincode, suspects]) =>
                         suspects.length > 1 ? {
@@ -72,9 +79,17 @@ sap.ui.define([
                     )
                 )
             );
-
-            // **Set Default Match Group to 95p**
-            this.updateSuspectList("All");
+            _cfg.groupCountText = "Groups Count: " + Object.keys( _cref._allSuspectData).length
+            var svals = Object.values(_cref._allSuspectData);
+            for (let i = 0; i < svals.length; i++) {
+                const elem = svals[i];
+                if(elem.country == "IN"){
+                    _cfg.nationalCustomerCnt += elem.suspects.length;
+                }else {
+                    _cfg.interNationalCustomerCnt += elem.suspects.length;
+                }
+            }
+            _cref.updateSuspectList("All");
         },
 
         updateSuspectList: function (filterType) {
@@ -82,7 +97,19 @@ sap.ui.define([
                 filterType === "National" ? item.country.startsWith("IN") :
                     filterType === "International" ? !item.country.startsWith("IN") : true
             );
-            this._view.setModel(new JSONModel({ suspects: filteredData }), "cmc");
+            _cfg.groupCountText = "Groups Count: " + Object.keys(filteredData).length
+            if(filterType == "National"){
+                _cfg.totalCustomerCnt = _cfg.nationalCustomerCnt;
+                _cfg.customerCountText = "Customers Count: " + _cfg.totalCustomerCnt;
+            }else if (filterType == "International"){
+                _cfg.totalCustomerCnt = _cfg.interNationalCustomerCnt;
+                _cfg.customerCountText = "Customers Count: " + _cfg.totalCustomerCnt;
+            }else {
+                _cfg.totalCustomerCnt = _cfg.nationalCustomerCnt + _cfg.interNationalCustomerCnt;
+                _cfg.customerCountText = "Customers Count: " + _cfg.totalCustomerCnt;
+            }
+            _v.getModel("vcfg").refresh(true);
+            _v.setModel(new JSONModel({ suspects: filteredData }), "cmc");
         },
 
         calculateLevenshteinDistance: function (str1, str2) {
@@ -128,7 +155,7 @@ sap.ui.define([
             let suspectData = this._allSuspectData.find(item => item.key === sKey);
             sap.ui.core.BusyIndicator.show(0);
             currNodeData = suspectData;
-            _cref.applySimilarityMatching(95);
+            _cref.applySimilarityMatching(_cfg.threshold);
             sap.ui.core.BusyIndicator.hide();
         },
 
@@ -136,43 +163,32 @@ sap.ui.define([
             this.updateSuspectList(oEvent.getParameter("selectedItem").getKey());
         },
 
-        onGoPress: function () {
-            let similarityThreshold = parseInt(this._view.byId("percentageInput").getValue(), 10);
-            if (isNaN(similarityThreshold) || similarityThreshold < 0 || similarityThreshold > 100) {
-                MessageBox.error("Please enter a valid percentage between 0 and 100.");
-                return;
-            }
-            this.applySimilarityMatching(similarityThreshold);
-            //MessageToast.show(`Match groups updated with ${similarityThreshold}% similarity.`);
+        handleCustomerThresholdChange: function () {
+            this.applySimilarityMatching(parseInt(_cfg.threshold));
         },
 
         applySimilarityMatching: function (similarityThreshold) {
             sap.ui.core.BusyIndicator.show(0);    
             var opsData = JSON.parse(JSON.stringify(currNodeData));
-            if (typeof opsData != "undefined") {
+            if (typeof opsData != "undefined" && (typeof opsData.suspects != "undefined")) {
                 var suspects = opsData.suspects;
+                suspects.sort((s1, s2) => (s1.StreetAdd.length > s2.StreetAdd.length) ? 1 : -1);
                 let alternateSuspects = [];
-                var groupCounter = 0;
+                var similarityCtr = 0;
         
                 while (suspects.length > 0) {
                     for (let i = 0; i < suspects.length; i++) {
                         const s = suspects[i];
                         if (i == 0) {
                             s.Duplicate = false;
-                            groupCounter++;
-                            s.MatchGroup = "P_" + similarityThreshold + "_" + groupCounter;
+                            similarityCtr++;
+                            s.MatchGroup = "P_" + similarityThreshold + "_" + similarityCtr;
                             alternateSuspects.push(s);
                         } else {
-                            console.log("Comparing StreetAdd:");
-                            console.log("StreetAdd 1:", suspects[0].StreetAdd);
-                            console.log("StreetAdd 2:", s.StreetAdd);
-        
                             // Compare only StreetAdd for similarity
                             let similarity = _cref.calculateAddressSimilarity(suspects[0].StreetAdd, s.StreetAdd);
-                            console.log("Similarity Score:", similarity);
-        
                             if (similarity >= similarityThreshold) {
-                                s.MatchGroup = "P_" + similarityThreshold + "_" + groupCounter;
+                                s.MatchGroup = "P_" + similarityThreshold + "_" + similarityCtr;
                                 s.Duplicate = true;
                                 alternateSuspects.push(s);
                             }
@@ -182,11 +198,11 @@ sap.ui.define([
                     suspects = suspects.filter(e => !alternateSuspects.some(s => s.CustomerId === e.CustomerId));
                 }
                 // Update the model with the matched suspects
-                this._view.getModel("details").setProperty("/selectedSuspects", alternateSuspects);
+                _v.getModel("details").setProperty("/selectedSuspects", alternateSuspects);
                 sap.ui.core.BusyIndicator.hide();
-            } else {
-                // Handle the case where opsData is undefined
-            }
+            } 
+            sap.ui.core.BusyIndicator.hide();
+            _v.getModel("vcfg").refresh(true);
         },
         onCustomerPage: function () {
             var oRouter = sap.ui.core.UIComponent.getRouterFor(this);

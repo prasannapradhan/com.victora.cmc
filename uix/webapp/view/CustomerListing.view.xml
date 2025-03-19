@@ -11,8 +11,9 @@
         <Page title="Duplicate Customer Groups">
             <content>
                 <VBox>
-                    <Toolbar>
-                        <!-- Dropdown Filter -->
+                   
+                    <Toolbar class="sapUiSmallPadding sapUiSmallMargin">
+                    
                         <Select id="filterSelect" change="onFilterChange">
                             <items>
                                 <core:Item key="All" text="All Customers"/>
@@ -21,18 +22,28 @@
                             </items>
                         </Select>
                         
-                
-                  
-                        <!-- Input Field for Percentage -->
-                        <Input id="percentageInput" placeholder="Enter %"  width="10rem"/>
-                    
-                        <!-- Go Button -->
-                        <Button text="Go" press="onGoPress"  class="myCustomButton"/>
-                    
+                        <Text class="sapUiTinyMarginBegin sapUiTinyMarginEnd" 
+                            text="{vcfg>/groupCountText}" width="auto" />
+
+                        <Text class="sapUiTinyMarginBegin sapUiTinyMarginEnd" 
+                            text="{vcfg>/customerCountText}" width="auto" />
+                        
+                        <Input 
+                            width="4rem" 
+                            value="{vcfg>/threshold}"
+                            type="Text"
+                            change="handleCustomerThresholdChange"
+                            />
+                        <Button 
+                            text="Apply" 
+                            press="handleCustomerThresholdChange" 
+                            type="Emphasized"
+                            />
                         <ToolbarSpacer/>
-                    
-                        <Button text="Vendor" press="onCustomerPage" class="myCustomButton"/>
+                        <Button text="Vendor" press="onCustomerPage" type="Emphasized"/>
+
                     </Toolbar>
+                
                     <FlexBox
                         direction="Row"
                         justifyContent="Start"
@@ -40,18 +51,16 @@
                     >
                         <!-- Suspect List -->
                         <ScrollContainer
-                            width="22rem"
+                            width="20rem"
                             height="84vh"
                             vertical="true"
-                        >
+                      >
                             <List
                                 id="suspectList"
                                 items="{cmc>/suspects}"
                                 mode="SingleSelectMaster"
                                 selectionChange="onSelectionChange"
-                                growing="true"
-                                growingThreshold="50"
-                                growingScrollToLoad="true"
+                                growing="false"
                             >
                                 <StandardListItem title="{cmc>displayKey}" />
                             </List>
@@ -90,7 +99,7 @@
                                 <table:Column width="auto">
                                     <Label text="Address" />
                                     <table:template>
-                                        <Text text="{details>Address}" />
+                                        <Text text="{details>StreetAdd}" />
                                     </table:template>
                                 </table:Column>
 
