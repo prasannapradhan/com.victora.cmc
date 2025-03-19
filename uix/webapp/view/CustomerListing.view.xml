@@ -129,7 +129,7 @@
                         >
                             <table:columns>
                                 <table:Column width="6rem">
-                                    <Label text="Match (%)" />
+                                    <Label text="Match Group" />
                                     <table:template>
                                         <l:HorizontalLayout>
                                             <l:content>
@@ -153,7 +153,7 @@
                                 <table:Column width="auto">
                                     <Label text="Address" />
                                     <table:template>
-                                        <Text text="{details>StreetAdd}" />
+                                        <Text text="{details>Address}" />
                                     </table:template>
                                 </table:Column>
 

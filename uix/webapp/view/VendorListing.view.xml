@@ -50,6 +50,7 @@
                             placeholder="Threshold"
                             class="sapUiTinyMarginEnd"
                             change="handleVendorThresholdChange"
+                            textAlign="Center"
                         />
 
                         <!-- Apply Button -->
@@ -150,7 +151,7 @@
                                 <table:Column width="auto">
                                     <Label text="Address" />
                                     <table:template>
-                                        <Text text="{details>StreetAdd}" />
+                                        <Text text="{details>Address}" />
                                     </table:template>
                                 </table:Column>
 

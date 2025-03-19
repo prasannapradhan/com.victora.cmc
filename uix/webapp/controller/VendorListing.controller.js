@@ -78,7 +78,7 @@ sap.ui.define([
                     )
                 )
             );
-            _cfg.groupCountText = "Groups Count: " + Object.keys(_cref._allSuspectData).length;
+            _cfg.groupCountText = "Groups: " + Object.keys(_cref._allSuspectData).length;
             var svals = Object.values(_cref._allSuspectData);
             for (let i = 0; i < svals.length; i++) {
                 const elem = svals[i];
@@ -121,16 +121,16 @@ sap.ui.define([
                 filterType === "National" ? item.country.startsWith("IN") :
                     filterType === "International" ? !item.country.startsWith("IN") : true
             );
-            _cfg.groupCountText = "Groups Count: " + Object.keys(filteredData).length;
+            _cfg.groupCountText = "Groups: " + Object.keys(filteredData).length;
             if (filterType == "National") {
                 _cfg.totalVendorCnt = _cfg.nationalVendorCnt;
-                _cfg.vendorCountText = "Vendors Count: " + _cfg.totalVendorCnt;
+                _cfg.vendorCountText = "Vendors: " + _cfg.totalVendorCnt;
             } else if (filterType == "International") {
                 _cfg.totalVendorCnt = _cfg.interNationalVendorCnt;
-                _cfg.vendorCountText = "Vendors Count: " + _cfg.totalVendorCnt;
+                _cfg.vendorCountText = "Vendors: " + _cfg.totalVendorCnt;
             } else {
                 _cfg.totalVendorCnt = _cfg.nationalVendorCnt + _cfg.interNationalVendorCnt;
-                _cfg.vendorCountText = "Vendors Count: " + _cfg.totalVendorCnt;
+                _cfg.vendorCountText = "Vendors: " + _cfg.totalVendorCnt;
             }
             _v.getModel("vcfg").refresh(true);
             _v.setModel(new JSONModel({ suspects: filteredData }), "cmc");
