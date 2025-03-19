@@ -207,6 +207,7 @@ sap.ui.define([
             sap.ui.core.BusyIndicator.hide();
             _v.getModel("vcfg").refresh(true);
         },
+
         onCustomerPage: function () {
             var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
             var oView = this.getView();
@@ -219,7 +220,7 @@ sap.ui.define([
             }, 1000);
         },
 
-        downloadAllSuspects: function () {
+        downloadAllCustomers: function () {
             let allData = [];
 
             // Get the current filter type from the model or UI
@@ -244,7 +245,7 @@ sap.ui.define([
                             "Country": group.country,
                             "Tax ID": suspect.TaxId,
                             "Pincode": suspect.Pincode,
-                            "Match (%)": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
+                            "Match Group": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
                             "Address": suspect.Address,
                             "Customer ID": suspect.CustomerId,
                             "Name": suspect.Name,
@@ -256,27 +257,26 @@ sap.ui.define([
             });
 
             // Define the filename
-            var filename = "Composition-Export.xlsx";
+            var filename = "customer-duplicate-all-export.xlsx";
 
             // Create a new workbook
             var wb = XLSX.utils.book_new();
 
             // Define the header data
             var headerData = [
-                ["Key", "Country", "Tax ID", "Pincode", "Match (%)", "Address", "Customer ID", "Name", "Region"]
+                ["Match Group", "Customer ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
             ];
 
             // Add the data rows to the headerData array
             allData.forEach(item => {
                 headerData.push([
-                    item["Key"],
+                    item["Match Group"],
+                    item["Customer ID"],
+                    item["Name"],
+                    item["Address"],
                     item["Country"],
                     item["Tax ID"],
                     item["Pincode"],
-                    item["Match (%)"],
-                    item["Address"],
-                    item["Customer ID"],
-                    item["Name"],
                     item["Region"]
                 ]);
             });
@@ -285,14 +285,15 @@ sap.ui.define([
             var wsh = XLSX.utils.aoa_to_sheet(headerData);
 
             // Append the worksheet to the workbook
-            XLSX.utils.book_append_sheet(wb, wsh, 'header-info');
+            XLSX.utils.book_append_sheet(wb, wsh, 'customerr-info');
 
             // Export the workbook to an Excel file
             XLSX.writeFile(wb, filename);
 
             MessageToast.show(`Customer data (${filterType}) has been exported to ${filename}`);
         },
-        downloadGroupData: function () {
+
+        downloadGroupCustomers: function () {
             // Get the selected key from the table (assuming it's stored in the model)
             let selectedKey = _v.getModel("cmc").getProperty("/selectedKey");
 
@@ -320,7 +321,7 @@ sap.ui.define([
                     "Country": selectedGroup.country,
                     "Tax ID": suspect.TaxId,
                     "Pincode": suspect.Pincode,
-                    "Match (%)": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
+                    "Match Group": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
                     "Address": suspect.Address,
                     "Customer ID": suspect.CustomerId,
                     "Name": suspect.Name,
@@ -330,27 +331,26 @@ sap.ui.define([
             });
 
             // Define the filename
-            var filename = "Group-Export.xlsx";
+            var filename = "customer-duplicate-group-export.xlsx";
 
             // Create a new workbook
             var wb = XLSX.utils.book_new();
 
             // Define the header data
             var headerData = [
-                ["Key", "Country", "Tax ID", "Pincode", "Match (%)", "Address", "Customer ID", "Name", "Region"]
+                ["Match Group", "Customer ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
             ];
 
             // Add the data rows to the headerData array
             groupData.forEach(item => {
                 headerData.push([
-                    item["Key"],
+                    item["Match Group"],
+                    item["Customer ID"],
+                    item["Name"],
+                    item["Address"],
                     item["Country"],
                     item["Tax ID"],
                     item["Pincode"],
-                    item["Match (%)"],
-                    item["Address"],
-                    item["Customer ID"],
-                    item["Name"],
                     item["Region"]
                 ]);
             });
@@ -366,6 +366,7 @@ sap.ui.define([
 
             MessageToast.show("Group data has been exported to " + filename);
         },
+        
         formatMatchGroupState: function (matchGroup) {
             if (!matchGroup) return "None"; // No color if no match group
 

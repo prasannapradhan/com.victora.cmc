@@ -72,7 +72,7 @@
                             <Button
                                 icon="sap-icon://download"
                                 text="Download All"
-                                press="downloadAllSuspects"
+                                press="downloadAllCustomers"
                                 type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
@@ -81,7 +81,7 @@
                             <Button
                                 icon="sap-icon://download"
                                 text="Download Group"
-                                press=".downloadGroupData"
+                                press=".downloadGroupCustomers"
                                 type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
