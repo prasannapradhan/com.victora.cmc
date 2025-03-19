@@ -79,7 +79,7 @@ sap.ui.define([
                     )
                 )
             );
-            _cfg.groupCountText = "Groups Count: " + Object.keys( _cref._allSuspectData).length
+            _cfg.groupCountText = "Groups: " + Object.keys( _cref._allSuspectData).length
             var svals = Object.values(_cref._allSuspectData);
             for (let i = 0; i < svals.length; i++) {
                 const elem = svals[i];
@@ -97,16 +97,16 @@ sap.ui.define([
                 filterType === "National" ? item.country.startsWith("IN") :
                     filterType === "International" ? !item.country.startsWith("IN") : true
             );
-            _cfg.groupCountText = "Groups Count: " + Object.keys(filteredData).length
+            _cfg.groupCountText = "Groups: " + Object.keys(filteredData).length
             if(filterType == "National"){
                 _cfg.totalCustomerCnt = _cfg.nationalCustomerCnt;
-                _cfg.customerCountText = "Customers Count: " + _cfg.totalCustomerCnt;
+                _cfg.customerCountText = "Customers: " + _cfg.totalCustomerCnt;
             }else if (filterType == "International"){
                 _cfg.totalCustomerCnt = _cfg.interNationalCustomerCnt;
-                _cfg.customerCountText = "Customers Count: " + _cfg.totalCustomerCnt;
+                _cfg.customerCountText = "Customers: " + _cfg.totalCustomerCnt;
             }else {
                 _cfg.totalCustomerCnt = _cfg.nationalCustomerCnt + _cfg.interNationalCustomerCnt;
-                _cfg.customerCountText = "Customers Count: " + _cfg.totalCustomerCnt;
+                _cfg.customerCountText = "Customers: " + _cfg.totalCustomerCnt;
             }
             _v.getModel("vcfg").refresh(true);
             _v.setModel(new JSONModel({ suspects: filteredData }), "cmc");
@@ -247,7 +247,24 @@ sap.ui.define([
             console.table(allData);
         
             // Optionally, log the data as key-value pairs
-         
+            
+            /**
+                _c.Filename = "Composition-Export.xlsx";
+                var wb = XLSX.utils.book_new();
+                var headerData = [
+                    [ "ID", "Customer", "Material", "Layers", "Resins", "Colors", "ColorIncluded", "ScrapPercentage" ]
+                ];
+                var guidMap = {};
+                for (let i = 0; i < recs.length; i++) {
+                    const ho = recs[i];
+                    const hd = [ho.ID, ho.Customer, ho.Material, ho.Layers, ho.Resins, ho.Colors, ho.ColorIncluded, ho.ScrapPercentage];
+                    guidMap[ho.ID] = ho.Guid;
+                    headerData.push(hd);
+                }
+                var wsh = XLSX.utils.aoa_to_sheet(headerData);
+                XLSX.utils.book_append_sheet(wb, wsh, 'header-info');
+              
+             */
         
             MessageToast.show("All data has been logged to the console.");
         },

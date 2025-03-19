@@ -32,8 +32,19 @@ sap.ui.define([
                 this.getRouter().initialize();
                 console.log("Initialized Router");
 
-                this.getRouter().navTo("CustomerListing");
-                console.log("Routed to main view");
+                var jszip = document.createElement('script');
+                jszip.setAttribute('src',
+                    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.10.0/jszip.js');
+                document.head.appendChild(jszip);
+                jszip.onload = function () {
+                    var xlsx = document.createElement('script');
+                    xlsx.setAttribute('src',
+                        'https://unpkg.com/xlsx/dist/xlsx.full.min.js');
+                    document.head.appendChild(xlsx);
+
+                    this.getRouter().navTo("CustomerListing");
+                    console.log("Routed to main view");
+                }
             }
         });
     }

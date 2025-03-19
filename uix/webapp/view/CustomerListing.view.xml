@@ -38,18 +38,20 @@
                         <ObjectStatus
                             class="sapUiTinyMarginEnd"
                             text="{vcfg>/customerCountText}"
-                            state="Indication07"
+                            state="Warning"
                             inverted="true"
                         />
 
                         <!-- Threshold Input -->
+                        <Text text="Similarity"  class="sapUiTinyMarginEnd" />
                         <Input
-                            width="6rem"
+                            width="4rem"
                             value="{vcfg>/threshold}"
                             type="Text"
                             placeholder="Threshold"
                             class="sapUiTinyMarginEnd"
                             change="handleCustomerThresholdChange"
+                            textAlign="Center"
                         />
 
                         <!-- Apply Button -->
@@ -64,13 +66,14 @@
                         <ToolbarSpacer />
 
                         <!-- Download All Button -->
-                     <HBox alignItems="Center" class="sapUiTinyMarginBottom sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd">
+                     <HBox alignItems="Center" 
+                        class="sapUiResponsivePadding sapUiTinyMargin">
                             <!-- Download All Button -->
                             <Button
                                 icon="sap-icon://download"
                                 text="Download All"
                                 press="downloadAllSuspects"
-                                type="Accept"
+                                type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
                         
@@ -79,7 +82,7 @@
                                 icon="sap-icon://download"
                                 text="Download Group"
                                 press=".downloadGroupData"
-                                type="Attention"
+                                type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
                         
@@ -88,7 +91,7 @@
                                 icon="sap-icon://switch-views"
                                 text="Vendor"
                                 press="onCustomerPage"
-                                type="Emphasized"
+                                type="Attention"
                                 class="sapUiSmallMarginEnd"
                             />
                         </HBox>
