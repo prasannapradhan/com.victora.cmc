@@ -105,7 +105,7 @@
                     >
                         <!-- Suspect List -->
                         <ScrollContainer
-                            width="21rem"
+                            width="18rem"
                             height="84vh"
                             vertical="true"
                         >

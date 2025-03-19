@@ -70,7 +70,7 @@
                             <Button
                                 icon="sap-icon://download"
                                 text="Download All"
-                                press="downloadAllSuspects"
+                                press="downloadAllVendors"
                                 type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
@@ -79,7 +79,7 @@
                             <Button
                                 icon="sap-icon://download"
                                 text="Download Group"
-                                press=".downloadGroupData"
+                                press=".downloadGroupVendors"
                                 type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
@@ -103,7 +103,7 @@
                     >
                         <!-- Suspect List -->
                         <ScrollContainer
-                            width="22rem"
+                            width="18rem"
                             height="84vh"
                             vertical="true"
                         >

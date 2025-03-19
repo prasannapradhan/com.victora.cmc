@@ -35,7 +35,7 @@ sap.ui.define([
         showVendorListing: async function () {
             try {
                 let vendorModel = new JSONModel();
-                await vendorModel.loadData("model/victora_vendor_master.json", false);
+                await vendorModel.loadData("/model/victora_vendor_master.json", false);
                 let vendorData = vendorModel.getData();
                 GeneralUtils.removeOdataResponseMetadata(vendorData);
                 this.processVendorData(vendorData.results || []);
@@ -79,14 +79,20 @@ sap.ui.define([
                 )
             );
             _cfg.groupCountText = "Groups: " + Object.keys(_cref._allSuspectData).length;
+            _cref.processSuspectData();
+            _cref.updateSuspectList("All");
+        },
+
+        processSuspectData: function () {
             var svals = Object.values(_cref._allSuspectData);
             for (let i = 0; i < svals.length; i++) {
                 const elem = svals[i];
                 if (elem.country == "IN") {
-                    _cfg.nationalVendorCnt += elem.suspects.length;
+                    _cfg.nationalCustomerCnt += elem.suspects.length;
                 } else {
-                    _cfg.interNationalVendorCnt += elem.suspects.length;
+                    _cfg.interNationalCustomerCnt += elem.suspects.length;
                 }
+
                 var suspects = JSON.parse(JSON.stringify(elem.suspects));
                 suspects.sort((s1, s2) => (s1.StreetAdd.length > s2.StreetAdd.length) ? 1 : -1);
                 let alternateSuspects = [];
@@ -113,7 +119,6 @@ sap.ui.define([
                 }
                 elem.suspects = alternateSuspects;
             }
-            _cref.updateSuspectList("All");
         },
 
         updateSuspectList: function (filterType) {
@@ -180,7 +185,7 @@ sap.ui.define([
             let suspectData = this._allSuspectData.find(item => item.key === sKey);
             sap.ui.core.BusyIndicator.show(0);
             currNodeData = suspectData;
-            _cref.applySimilarityMatching(_cfg.threshold);
+            _cref.applySimilarityMatching();
             sap.ui.core.BusyIndicator.hide();
         },
 
@@ -191,14 +196,14 @@ sap.ui.define([
         },
 
         handleVendorThresholdChange: function () {
-            this.applySimilarityMatching(parseInt(_cfg.threshold));
+            _cref.processSuspectData();
+            _cref.applySimilarityMatching();
         },
 
-        applySimilarityMatching: function (similarityThreshold, group) {
+        applySimilarityMatching: function () {
             sap.ui.core.BusyIndicator.show(0);
-            var opsData = group || currNodeData;
-            if (typeof opsData != "undefined" && (typeof opsData.suspects != "undefined")) {
-                var suspects = opsData.suspects;
+            if (typeof currNodeData != "undefined" && (typeof currNodeData.suspects != "undefined")) {
+                var suspects = currNodeData.suspects;
                 _v.getModel("details").setProperty("/selectedSuspects", suspects);
                 sap.ui.core.BusyIndicator.hide();
             }
@@ -208,107 +213,87 @@ sap.ui.define([
 
         onVendorPage: function () {
             var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
-            var oView = this.getView();
-
             sap.ui.core.BusyIndicator.show(0);
-
             setTimeout(function () {
                 sap.ui.core.BusyIndicator.hide();
                 oRouter.navTo("CustomerListing");
             }, 1000);
         },
 
-        downloadAllSuspects: function () {
+        downloadAllVendors: function () {
             // Show Busy Indicator
             sap.ui.core.BusyIndicator.show(0);
-        
+
             // Simulate a delay for testing
-            setTimeout(() => {
-                let allData = [];
-        
-                // Get the current filter type from the model or UI
-                let filterType = _v.getModel("vcfg").getProperty("/filterType") || "All"; // Default to "All" if not set
-        
-                // Apply similarity matching to all groups in _allSuspectData
-                this._allSuspectData.forEach(group => {
-                    this.applySimilarityMatching(_cfg.threshold, group); // Apply matching to each group
-                });
-        
-                // Process and prepare the data for export based on the current filter
-                this._allSuspectData.forEach(group => {
-                    // Check if the group matches the current filter
-                    if (
-                        filterType === "All" ||
-                        (filterType === "National" && group.country.startsWith("IN")) ||
-                        (filterType === "International" && !group.country.startsWith("IN"))
-                    ) {
-                        // Process and log the data
-                        group.suspects.forEach(suspect => {
-                            let data = {
-                                "Key": group.key,
-                                "Country": group.country,
-                                "Tax ID": suspect.TaxId,
-                                "Pincode": suspect.Pincode,
-                                "Match (%)": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
-                                "Address": suspect.Address,
-                                "Vendor ID": suspect.VendorId,
-                                "Name": suspect.Name,
-                                "Region": suspect.Region
-                            };
-                            allData.push(data);
-                        });
-                    }
-                });
-        
-                // Define the filename
-                var filename = "Vendor_data-Export.xlsx";
-        
-                // Create a new workbook
-                var wb = XLSX.utils.book_new();
-        
-                // Define the header data
-                var headerData = [
-                    ["Key", "Match (%)", "Vendor ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
-                ];
-        
-                // Add the data rows to the headerData array
-                allData.forEach(item => {
-                    headerData.push([
-                        item["Key"],
-                        item["Match (%)"],
-                        item["Vendor ID"],
-                        item["Name"],
-                        item["Address"],
-                        item["Country"],
-                        item["Tax ID"],
-                        item["Pincode"],
-                        item["Region"]
-                    ]);
-                });
-        
-                // Convert the headerData array to a worksheet
-                var wsh = XLSX.utils.aoa_to_sheet(headerData);
-        
-                // Append the worksheet to the workbook
-                XLSX.utils.book_append_sheet(wb, wsh, 'header-info');
-        
-                // Export the workbook to an Excel file
-                XLSX.writeFile(wb, filename);
-        
-                // Hide Busy Indicator after download is complete
-                sap.ui.core.BusyIndicator.hide();
-        
-                MessageToast.show(`Vendor data (${filterType}) has been exported to ${filename}`);
-            }, 1000); // Simulate a 1-second delay
+            let allData = [];
+            let filterType = _v.getModel("vcfg").getProperty("/filterType") || "All"; // Default to "All" if not set
+            this._allSuspectData.forEach(group => {
+                if (
+                    filterType === "All" ||
+                    (filterType === "National" && group.country.startsWith("IN")) ||
+                    (filterType === "International" && !group.country.startsWith("IN"))
+                ) {
+                    // Process and log the data
+                    group.suspects.forEach(suspect => {
+                        let data = {
+                            "Key": group.key,
+                            "Country": group.country,
+                            "Tax ID": suspect.TaxId,
+                            "Pincode": suspect.Pincode,
+                            "Match (%)": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
+                            "Address": suspect.Address,
+                            "Vendor ID": suspect.VendorId,
+                            "Name": suspect.Name,
+                            "Region": suspect.Region
+                        };
+                        allData.push(data);
+                    });
+                }
+            });
+
+            // Define the filename
+            var filename = "Vendor_data-Export.xlsx";
+
+            // Create a new workbook
+            var wb = XLSX.utils.book_new();
+
+            // Define the header data
+            var headerData = [
+                ["Key", "Match (%)", "Vendor ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
+            ];
+
+            // Add the data rows to the headerData array
+            allData.forEach(item => {
+                headerData.push([
+                    item["Key"],
+                    item["Match (%)"],
+                    item["Vendor ID"],
+                    item["Name"],
+                    item["Address"],
+                    item["Country"],
+                    item["Tax ID"],
+                    item["Pincode"],
+                    item["Region"]
+                ]);
+            });
+
+            // Convert the headerData array to a worksheet
+            var wsh = XLSX.utils.aoa_to_sheet(headerData);
+
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(wb, wsh, 'vendor-duplicates');
+
+            // Export the workbook to an Excel file
+            XLSX.writeFile(wb, filename);
+
+            // Hide Busy Indicator after download is complete
+            sap.ui.core.BusyIndicator.hide();
+
+            MessageToast.show(`Vendor data (${filterType}) has been exported to ${filename}`);
         },
 
-        downloadGroupData: function () {
-
+        downloadGroupVendors: function () {
             sap.ui.core.BusyIndicator.show(0);
-
-            
-            // Simulate a delay for testing
-            setTimeout(() => {
             // Get the selected key from the table (assuming it's stored in the model)
             let selectedKey = _v.getModel("cmc").getProperty("/selectedKey");
 
@@ -326,9 +311,6 @@ sap.ui.define([
                 MessageToast.show("No data found for the selected group.");
                 return;
             }
-
-            // Apply similarity matching to the selected group
-            this.applySimilarityMatching(_cfg.threshold, selectedGroup);
 
             // Prepare the data for the selected group
             let groupData = [];
@@ -348,13 +330,13 @@ sap.ui.define([
             });
 
             // Define the filename
-            var filename = "Vendor-Group-Export.xlsx";
+            var filename = "vendor-duplicate-group-export.xlsx";
 
             // Create a new workbook
             var wb = XLSX.utils.book_new();
             // Define the header data
             var headerData = [
-                ["Match (%)","Vendor ID", "Name", "Address", "Country", "Tax ID", "Pincode",    "Region"]
+                ["Match (%)", "Vendor ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
             ];
             // Add the data rows to the headerData array
             groupData.forEach(item => {
@@ -367,21 +349,19 @@ sap.ui.define([
                     item["Tax ID"],
                     item["Pincode"],
                     item["Region"]
-                    
                 ]);
             });
 
             var wsh = XLSX.utils.aoa_to_sheet(headerData);
 
             // Append the worksheet to the workbook
-            XLSX.utils.book_append_sheet(wb, wsh, 'Group Data');
+            XLSX.utils.book_append_sheet(wb, wsh, selectedKey);
 
             // Export the workbook to an Excel file
             XLSX.writeFile(wb, filename);
             sap.ui.core.BusyIndicator.hide();
 
             MessageToast.show("Group data has been exported to " + filename);
-        }, 1000);
         },
 
         formatMatchGroupState: function (matchGroup) {
