@@ -4,46 +4,97 @@
     xmlns:core="sap.ui.core"
     xmlns:table="sap.ui.table"
     xmlns:l="sap.ui.layout"
-    xmlns:html="http://www.w3.org/1999/xhtml"
     controllerName="com.victora.cmc.uix.controller.CustomerListing"
 >
     <App>
         <Page title="Duplicate Customer Groups">
             <content>
                 <VBox>
-                   
-                    <Toolbar class="sapUiSmallPadding sapUiSmallMargin">
-                    
-                        <Select id="filterSelect" change="onFilterChange">
+                    <!-- Enhanced Toolbar -->
+                    <Toolbar class="sapUiSmallMarginBottom sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd">
+                        <!-- Filter Dropdown -->
+                        <Select
+                            id="filterSelect"
+                            width="12rem"
+                            change="onFilterChange"
+                            class="sapUiSmallMarginEnd"
+                        >
                             <items>
-                                <core:Item key="All" text="All Customers"/>
-                                <core:Item key="National" text="National (India)"/>
-                                <core:Item key="International" text="International"/>
+                                <core:Item key="All" text="All Customers" />
+                                <core:Item key="National" text="National (India)" />
+                                <core:Item key="International" text="International" />
                             </items>
                         </Select>
-                        
-                        <Text class="sapUiTinyMarginBegin sapUiTinyMarginEnd" 
-                            text="{vcfg>/groupCountText}" width="auto" />
 
-                        <Text class="sapUiTinyMarginBegin sapUiTinyMarginEnd" 
-                            text="{vcfg>/customerCountText}" width="auto" />
-                        
-                        <Input 
-                            width="4rem" 
+                        <!-- Group Count -->
+                        <ObjectStatus
+                            class="sapUiTinyMarginEnd"
+                            text="{vcfg>/groupCountText}"
+                            state="Warning"
+                            inverted="true"
+                        />
+
+                        <!-- Customer Count -->
+                        <ObjectStatus
+                            class="sapUiTinyMarginEnd"
+                            text="{vcfg>/customerCountText}"
+                            state="Indication07"
+                            inverted="true"
+                        />
+
+                        <!-- Threshold Input -->
+                        <Input
+                            width="6rem"
                             value="{vcfg>/threshold}"
                             type="Text"
+                            placeholder="Threshold"
+                            class="sapUiTinyMarginEnd"
                             change="handleCustomerThresholdChange"
-                            />
-                        <Button 
-                            text="Apply" 
-                            press="handleCustomerThresholdChange" 
-                            type="Emphasized"
-                            />
-                        <ToolbarSpacer/>
-                        <Button text="Vendor" press="onCustomerPage" type="Emphasized"/>
+                        />
 
+                        <!-- Apply Button -->
+                        <Button
+                            text="Apply"
+                            press="handleCustomerThresholdChange"
+                            type="Emphasized"
+                            class="sapUiTinyMarginEnd"
+                        />
+
+                        <!-- Spacer -->
+                        <ToolbarSpacer />
+
+                        <!-- Download All Button -->
+                     <HBox alignItems="Center" class="sapUiTinyMarginBottom sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd">
+                            <!-- Download All Button -->
+                            <Button
+                                icon="sap-icon://download"
+                                text="Download All"
+                                press="downloadAllSuspects"
+                                type="Accept"
+                                class="sapUiSmallMarginEnd"
+                            />
+                        
+                            <!-- Download Group Button -->
+                            <Button
+                                icon="sap-icon://download"
+                                text="Download Group"
+                                press=".downloadGroupData"
+                                type="Attention"
+                                class="sapUiSmallMarginEnd"
+                            />
+                        
+                            <!-- Vendor Button -->
+                            <Button
+                                icon="sap-icon://switch-views"
+                                text="Vendor"
+                                press="onCustomerPage"
+                                type="Emphasized"
+                                class="sapUiSmallMarginEnd"
+                            />
+                        </HBox>
                     </Toolbar>
-                
+
+                    <!-- FlexBox for List and Table -->
                     <FlexBox
                         direction="Row"
                         justifyContent="Start"
@@ -51,10 +102,10 @@
                     >
                         <!-- Suspect List -->
                         <ScrollContainer
-                            width="20rem"
+                            width="21rem"
                             height="84vh"
                             vertical="true"
-                      >
+                        >
                             <List
                                 id="suspectList"
                                 items="{cmc>/suspects}"
@@ -84,13 +135,13 @@
                                                     class="boldText"
                                                     visible="{= !${details>Duplicate}}"
                                                 />
-                                                <ObjectStatus 
+                                                <ObjectStatus
                                                     class="sapUiSmallPadding sapUiSmallMargin"
-                                                    text="{details>MatchGroup}" 
+                                                    text="{details>MatchGroup}"
                                                     state="Success"
                                                     visible="{= ${details>Duplicate}}"
                                                     inverted="true"
-                        						/>
+                                                />
                                             </l:content>
                                         </l:HorizontalLayout>
                                     </table:template>

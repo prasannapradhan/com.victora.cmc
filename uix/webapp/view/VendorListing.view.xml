@@ -10,43 +10,100 @@
         <Page title="Duplicate Vendor Groups">
             <content>
                 <VBox>
-                    <Toolbar>
-                        <!--  Dropdown Filter  -->
-                        <Select id="vendorFilterSelect" change="onFilterChange">
-                        <items>
-                        <core:Item key="All" text="All Vendor"/>
-                        <core:Item key="National" text="National (India)"/>
-                        <core:Item key="International" text="International"/>
-                        </items>
+                    <!-- Enhanced Toolbar -->
+                    <Toolbar class="sapUiSmallMarginBottom sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd">
+                        <!-- Filter Dropdown -->
+                        <Select
+                            id="vendorFilterSelect"
+                            width="12rem"
+                            change="onFilterChange"
+                            class="sapUiSmallMarginEnd"
+                        >
+                            <items>
+                                <core:Item key="All" text="All Vendors" />
+                                <core:Item key="National" text="National (India)" />
+                                <core:Item key="International" text="International" />
+                            </items>
                         </Select>
-                        <Input
-                        id="vendorPercentageInput"
-                        value="{details>/similarityThreshold}"
-                        liveChange="onLiveChange"
-                        submit="onGoPress"
-                        class="Percentage"
-                        placeholder="Enter %"
-                        width="10rem"
-                    />
-                        <!--  Go Button  -->
-                        <Button  text="Search %"
-                        type="Emphasized"
-                        icon="sap-icon://search"
-                        class="sapUiSmallMarginBegin"
-                         press="onGoPress"/>
-                        <ToolbarSpacer/>
-                        <Button text="Customer"  type="Emphasized" press="onVendorPage" class="myCustomButton"/>
-                        </Toolbar>
 
+                        <!-- Group Count -->
+                        <ObjectStatus
+                            class="sapUiTinyMarginEnd"
+                            text="{vcfg>/groupCountText}"
+                            state="Warning"
+                            inverted="true"
+                        />
+
+                        <!-- Vendor Count -->
+                        <ObjectStatus
+                            class="sapUiTinyMarginEnd"
+                            text="{vcfg>/vendorCountText}"
+                            state="Indication07"
+                            inverted="true"
+                        />
+
+                        <!-- Threshold Input -->
+                        <Input
+                            width="6rem"
+                            value="{vcfg>/threshold}"
+                            type="Text"
+                            placeholder="Threshold"
+                            class="sapUiTinyMarginEnd"
+                            change="handleVendorThresholdChange"
+                        />
+
+                        <!-- Apply Button -->
+                        <Button
+                            text="Apply"
+                            press="handleVendorThresholdChange"
+                            type="Emphasized"
+                            class="sapUiTinyMarginEnd"
+                        />
+
+                        <!-- Spacer -->
+                        <ToolbarSpacer />
+
+                        <!-- Download All Button -->
+                        <HBox alignItems="Center" class=" sapUiTinyMarginBottom  sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd">
+                            <!-- Download All Button -->
+                            <Button
+                                icon="sap-icon://download"
+                                text="Download All"
+                                press="downloadAllSuspects"
+                                type="Accept"
+                                class="sapUiSmallMarginEnd"
+                            />
+                        
+                            <!-- Download Group Button -->
+                            <Button
+                                icon="sap-icon://download"
+                                text="Download Group"
+                                press=".downloadGroupData"
+                                type="Attention"
+                                class="sapUiSmallMarginEnd"
+                            />
+                        
+                            <!-- Customer Button -->
+                            <Button
+                                icon="sap-icon://switch-views"
+                                text="Customer"
+                                press="onVendorPage"
+                                type="Emphasized"
+                                class="sapUiSmallMarginEnd"
+                            />
+                        </HBox>
+                    </Toolbar>
+
+                    <!-- FlexBox for List and Table -->
                     <FlexBox
                         direction="Row"
                         justifyContent="Start"
                         fitContainer="true"
                     >
-                        <!--  Suspect List  -->
+                        <!-- Suspect List -->
                         <ScrollContainer
                             width="22rem"
-                            height="85vh"
+                            height="84vh"
                             vertical="true"
                         >
                             <List
@@ -54,19 +111,13 @@
                                 items="{cmc>/suspects}"
                                 mode="SingleSelectMaster"
                                 selectionChange="onSelectionChange"
-                                growing="true"
-                                growingThreshold="50"
-                                growingScrollToLoad="true"
+                                growing="false"
                             >
-                                <items>
-                                    <StandardListItem
-                                        title="{cmc>displayKey}"
-                                    />
-                                </items>
+                                <StandardListItem title="{cmc>displayKey}" />
                             </List>
                         </ScrollContainer>
 
-                        <!--  Suspect Details Table  -->
+                        <!-- Suspect Details Table -->
                         <table:Table
                             id="suspectDetailsTableDuplicate"
                             rows="{details>/selectedSuspects}"
@@ -99,21 +150,24 @@
                                 <table:Column width="auto">
                                     <Label text="Address" />
                                     <table:template>
-                                        <Text text="{details>Address}" />
+                                        <Text text="{details>StreetAdd}" />
                                     </table:template>
                                 </table:Column>
+
                                 <table:Column width="8rem">
                                     <Label text="Vendor ID" />
                                     <table:template>
                                         <Text text="{details>VendorId}" />
                                     </table:template>
                                 </table:Column>
+
                                 <table:Column width="18rem">
                                     <Label text="Name" />
                                     <table:template>
                                         <Text text="{details>Name}" />
                                     </table:template>
                                 </table:Column>
+
                                 <table:Column width="5rem">
                                     <Label text="Region" />
                                     <table:template>

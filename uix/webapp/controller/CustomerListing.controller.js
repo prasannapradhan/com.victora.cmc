@@ -152,6 +152,7 @@ sap.ui.define([
 
         onSelectionChange: function (oEvent) {
             let sKey = oEvent.getParameter("listItem").getBindingContext("cmc").getProperty("key");
+            _v.getModel("cmc").setProperty("/selectedKey", sKey);
             let suspectData = this._allSuspectData.find(item => item.key === sKey);
             sap.ui.core.BusyIndicator.show(0);
             currNodeData = suspectData;
@@ -167,9 +168,9 @@ sap.ui.define([
             this.applySimilarityMatching(parseInt(_cfg.threshold));
         },
 
-        applySimilarityMatching: function (similarityThreshold) {
+        applySimilarityMatching: function (similarityThreshold ,group) {
             sap.ui.core.BusyIndicator.show(0);    
-            var opsData = JSON.parse(JSON.stringify(currNodeData));
+            var opsData = group || currNodeData;
             if (typeof opsData != "undefined" && (typeof opsData.suspects != "undefined")) {
                 var suspects = opsData.suspects;
                 suspects.sort((s1, s2) => (s1.StreetAdd.length > s2.StreetAdd.length) ? 1 : -1);
@@ -214,8 +215,107 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
                 oRouter.navTo("VendorListing");
             }, 1000);
+        },
+
+        downloadAllSuspects: function() {
+            let allData = [];
+        
+            // Apply similarity matching to all groups in _allSuspectData
+            this._allSuspectData.forEach(group => {
+                this.applySimilarityMatching(_cfg.threshold, group); // Apply matching to each group
+            });
+        
+            // Process and log the data
+            this._allSuspectData.forEach(group => {
+                group.suspects.forEach(suspect => {
+                    let data = {
+                        "Key": group.key,
+                        "Country": group.country,
+                        "Tax ID": suspect.TaxId,
+                        "Pincode": suspect.Pincode,
+                        "Match (%)": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
+                        "Address": suspect.Address,
+                        "Customer ID": suspect.CustomerId,
+                        "Name": suspect.Name,
+                        "Region": suspect.Region
+                    };
+                    allData.push(data);
+                });
+            });
+        
+            // Log the data in a tabular format
+            console.table(allData);
+        
+            // Optionally, log the data as key-value pairs
+         
+        
+            MessageToast.show("All data has been logged to the console.");
+        },
+
+        downloadGroupData: function() {
+            // Get the selected key from the table (assuming it's stored in the model)
+            let selectedKey = _v.getModel("cmc").getProperty("/selectedKey");
+            
+            if (!selectedKey) {
+                MessageToast.show("Please select a group to download.");
+                return;
+            }
+        
+            // Find the group data for the selected key
+            let selectedGroup = this._allSuspectData.find(group => group.key === selectedKey);
+            
+            if (!selectedGroup) {
+                MessageToast.show("No data found for the selected group.");
+                return;
+            }
+        
+            // Apply similarity matching to the selected group
+            this.applySimilarityMatching(_cfg.threshold, selectedGroup);
+        
+            // Prepare the data for the selected group
+            let groupData = [];
+            selectedGroup.suspects.forEach(suspect => {
+                let data = {
+                    "Key": selectedGroup.key,
+                    "Country": selectedGroup.country,
+                    "Tax ID": suspect.TaxId,
+                    "Pincode": suspect.Pincode,
+                    "Match (%)": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
+                    "Address": suspect.Address,
+                    "Customer ID": suspect.CustomerId,
+                    "Name": suspect.Name,
+                    "Region": suspect.Region
+                };
+                groupData.push(data);
+            });
+        
+            // Log the data in a tabular format
+            console.table(groupData);
+        
+           
+        
+            MessageToast.show("Group data has been logged to the console.");
+        },
+
+        formatMatchGroupState: function(matchGroup) {
+            if (!matchGroup) return "None"; // No color if no match group
+        
+            // Extract the similarity threshold and group number from the MatchGroup value
+            let matchParts = matchGroup.split("_");
+            if (matchParts.length >= 3) {
+                let groupNumber = matchParts[2]; // Get the group number (e.g., 1, 2, 3, etc.)
+                
+                // Assign different states (colors) based on the group number
+                switch (groupNumber % 5) { // Use modulo to cycle through 5 colors
+                    case 1: return "Success"; // Green
+                    case 2: return "Warning"; // Yellow
+                    case 3: return "Error";   // Red
+                    case 4: return "Information"; // Blue
+                    case 0: return "Indication07"; // Purple
+                    default: return "None";
+                }
+            }
+            return "None"; // Default no color
         }
-
-
     });
 });
