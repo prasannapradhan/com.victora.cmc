@@ -96,11 +96,11 @@
                                 <Menu>
                                     <MenuItem 
                                         text="Customer" 
-                                        icon="sap-icon://supplier"
+                                        icon="sap-icon://customer"
                                         press="onCustomerPage"/>
                                     <MenuItem 
                                         text="Vendor" 
-                                        icon="sap-icon://product"
+                                        icon="sap-icon://supplier"
                                         press="onVendorPage"/>
                                 </Menu>
                             </menu>

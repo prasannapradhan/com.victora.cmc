@@ -95,7 +95,7 @@
                                 <Menu>
                                     <MenuItem 
                                         text="Customer" 
-                                        icon="sap-icon://supplier"
+                                        icon="sap-icon://customer"
                                         press="onCustomerPage"/>
                                     <MenuItem 
                                         text="Material" 
