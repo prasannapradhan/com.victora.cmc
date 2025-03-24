@@ -4,6 +4,7 @@
     xmlns:core="sap.ui.core"
     xmlns:table="sap.ui.table"
     xmlns:l="sap.ui.layout"
+    xmlns:commons="sap.ui.commons"
     controllerName="com.victora.cmc.uix.controller.CustomerListing"
 >
     <App>
@@ -11,7 +12,9 @@
             <content>
                 <VBox>
                     <!-- Enhanced Toolbar -->
-                    <Toolbar class="sapUiSmallMarginBottom sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd">
+                    <Toolbar
+                        class="sapUiSmallMarginBottom sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd"
+                    >
                         <!-- Filter Dropdown -->
                         <Select
                             id="filterSelect"
@@ -20,9 +23,18 @@
                             class="sapUiSmallMarginEnd"
                         >
                             <items>
-                                <core:Item key="All" text="All Customers" />
-                                <core:Item key="National" text="National (India)" />
-                                <core:Item key="International" text="International" />
+                                <core:Item
+                                    key="All"
+                                    text="All Customers"
+                                />
+                                <core:Item
+                                    key="National"
+                                    text="National (India)"
+                                />
+                                <core:Item
+                                    key="International"
+                                    text="International"
+                                />
                             </items>
                         </Select>
 
@@ -43,7 +55,10 @@
                         />
 
                         <!-- Threshold Input -->
-                        <Text text="Similarity"  class="sapUiTinyMarginEnd" />
+                        <Text
+                            text="Similarity"
+                            class="sapUiTinyMarginEnd"
+                        />
                         <Input
                             width="4rem"
                             value="{vcfg>/threshold}"
@@ -66,8 +81,10 @@
                         <ToolbarSpacer />
 
                         <!-- Download All Button -->
-                     <HBox alignItems="Center" 
-                        class="sapUiResponsivePadding sapUiTinyMargin">
+                        <HBox
+                            alignItems="Center"
+                            class="sapUiResponsivePadding sapUiTinyMargin"
+                        >
                             <!-- Download All Button -->
                             <Button
                                 icon="sap-icon://download"
@@ -76,7 +93,7 @@
                                 type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
-                        
+
                             <!-- Download Group Button -->
                             <Button
                                 icon="sap-icon://download"
@@ -85,23 +102,29 @@
                                 type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
-                        
-                            <!-- Vendor Button -->
-                            <Button
-                                icon="sap-icon://switch-views"
-                                text="Vendor"
-                                press="onCustomerPage"
-                                type="Attention"
-                                class="sapUiSmallMarginEnd"
-                            />
 
-                            <Button
-                                icon="sap-icon://switch-views"
-                                text="Meterial"
-                                press="onMeterialPage"
-                                type="Attention"
-                                class="sapUiSmallMarginEnd"
-                            />
+                            <!-- Option 1: Using sap.m.Select (simpler dropdown) -->
+
+                            <!-- Option 2: Using sap.m.MenuButton (better for actions) -->
+                            <MenuButton
+                            id="navDropdown2"
+                            icon="sap-icon://switch-views"
+                            text="Go to"
+                            type="Transparent"
+                            class="sapUiSmallMarginEnd customNavButton">
+                            <menu>
+                                <Menu>
+                                    <MenuItem 
+                                        text="Vendor" 
+                                        icon="sap-icon://supplier"
+                                        press="onCustomerPage"/>
+                                    <MenuItem 
+                                        text="Material" 
+                                        icon="sap-icon://product"
+                                        press="onMeterialPage"/>
+                                </Menu>
+                            </menu>
+                        </MenuButton>
                         </HBox>
                     </Toolbar>
 

@@ -3,8 +3,9 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "com/victora/cmc/uix/util/GeneralUtils",
     "sap/m/MessageBox",
-    "sap/m/MessageToast"
-], function (Controller, JSONModel, GeneralUtils, MessageBox, MessageToast) {
+    "sap/m/MessageToast",
+    "sap/ui/core/Item"
+], function (Controller, JSONModel, GeneralUtils, MessageBox, MessageToast, Item) {
     "use strict";
 
     var _cref = {};
@@ -27,8 +28,13 @@ sap.ui.define([
             _cfg.groupCountText = "";
             _cfg.materialCountText = "";
             _cfg.totalMaterialCnt = 0;
+            _cfg.availableTypes = ["All"]; // Initialize with "All" option
 
-            _v.setModel(new JSONModel({ selectedSuspects: [], similarityThreshold: _cfg.threshold }), "details");
+            _v.setModel(new JSONModel({ 
+                selectedSuspects: [], 
+                similarityThreshold: _cfg.threshold 
+            }), "details");
+            
             _v.setModel(new JSONModel(_cfg), "vcfg");
             
             // Show loader while loading data
@@ -57,15 +63,23 @@ sap.ui.define([
                 console.error("Error loading material data:", error);
             }
         },
+
         processMaterialData: function (materialData) {
             // Show loader while processing data
             sap.ui.core.BusyIndicator.show(0);
             
             let materialMap = {};
+            let uniqueTypes = new Set();
+
             materialData.forEach(e => {
-                // Skip if description is blank or less than 5 characters
-                if (!e.Description || e.Description.trim().length < 5) {
-                    return; // skip this entry
+                // Skip if description is blank or less than 2 characters
+                if (!e.Description || e.Description.trim().length < 2) {
+                    return;
+                }
+                
+                // Add type to unique types set
+                if (e.Type) {
+                    uniqueTypes.add(e.Type);
                 }
                 
                 // Clean up Description for display
@@ -76,10 +90,17 @@ sap.ui.define([
                 if (!materialMap[e.Type][e.Description]) materialMap[e.Type][e.Description] = [];
                 materialMap[e.Type][e.Description].push(e);
             });
+
+            // Convert Set to array and sort alphabetically
+            _cfg.availableTypes = ["All", ...Array.from(uniqueTypes).sort()];
+            console.log("All available material types:", _cfg.availableTypes.slice(1)); // Exclude "All" from console log
+            
+            // Update available types in the model
+            _v.getModel("vcfg").setProperty("/availableTypes", _cfg.availableTypes);
+            _v.getModel("vcfg").refresh(true);
             
             this.constructSuspectMap(materialMap);
         },
-
 
         constructSuspectMap: function (materialMap) {
             _cref._allSuspectData = Object.entries(materialMap).flatMap(([type, descObj]) =>
@@ -92,11 +113,10 @@ sap.ui.define([
                     } : []
                 )
             );
-            _cfg.groupCountText = "Groups: " + Object.keys(_cref._allSuspectData).length;
+            
+            _cfg.groupCountText = "Groups: " + _cref._allSuspectData.length;
             _cref.processSuspectData();
             _cref.updateSuspectList("All");
-
-            
         },
 
         processSuspectData: function () {
@@ -134,15 +154,21 @@ sap.ui.define([
         },
 
         updateSuspectList: function (filterType) {
-            let filteredData = this._allSuspectData.filter(item =>
-                filterType === "Type1" ? item.type === "Type1" :
-                    filterType === "Type2" ? item.type === "Type2" : true
-            );
-            _cfg.groupCountText = "Groups: " + Object.keys(filteredData).length;
+            let filteredData = this._allSuspectData;
+            
+            if (filterType !== "All") {
+                filteredData = filteredData.filter(item => item.type === filterType);
+            }
+            
+            _cfg.groupCountText = "Groups: " + filteredData.length;
             _cfg.totalMaterialCnt = filteredData.reduce((acc, item) => acc + item.suspects.length, 0);
             _cfg.materialCountText = "Materials: " + _cfg.totalMaterialCnt;
+            
             _v.getModel("vcfg").refresh(true);
-            _v.setModel(new JSONModel({ suspects: filteredData }), "cmc");
+            _v.setModel(new JSONModel({ 
+                suspects: filteredData,
+                selectedKey: null // Reset selection when filtering
+            }), "cmc");
         },
 
         onSelectionChange: function (oEvent) {
@@ -182,11 +208,7 @@ sap.ui.define([
             let allData = [];
             let filterType = _v.getModel("vcfg").getProperty("/filterType") || "All";
             this._allSuspectData.forEach(group => {
-                if (
-                    filterType === "All" ||
-                    (filterType === "Type1" && group.type === "Type1") ||
-                    (filterType === "Type2" && group.type === "Type2")
-                ) {
+                if (filterType === "All" || group.type === filterType) {
                     group.suspects.forEach(suspect => {
                         let data = {
                             "Key": group.key,
@@ -274,7 +296,8 @@ sap.ui.define([
             sap.ui.core.BusyIndicator.hide();
             MessageToast.show("Group data has been exported to " + filename);
         },
-        onVendorPage: function () {
+
+        onCustomerPage: function () {
             var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
             sap.ui.core.BusyIndicator.show(0);
             setTimeout(function () {
@@ -282,6 +305,13 @@ sap.ui.define([
                 oRouter.navTo("CustomerListing");
             }, 1000);
         },
-
+        onVendorPage: function () {
+            var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+            sap.ui.core.BusyIndicator.show(0);
+            setTimeout(function () {
+                sap.ui.core.BusyIndicator.hide();
+                oRouter.navTo("VendorListing");
+            }, 1000);
+        },
     });
 });

@@ -14,18 +14,19 @@
                     <Toolbar class="sapUiSmallMarginBottom sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd">
                         <!-- Filter Dropdown -->
                         <Select
-                            id="filterSelectUnique"
+                            id="typeFilterSelect"
                             width="12rem"
                             change="onFilterChange"
                             class="sapUiSmallMarginEnd"
-                        >
-                            <items>
-                                <core:Item key="All" text="All Materials" />
-                                <core:Item key="Type1" text="Type 1" />
-                                <core:Item key="Type2" text="Type 2" />
-                            </items>
+                            items="{
+                                path: 'vcfg>/availableTypes',
+                                templateShareable: false
+                            }">
+                            <core:Item key="{vcfg>}" text="{
+                                path: 'vcfg>',
+                                formatter: '.formatTypeText'
+                            }"/>
                         </Select>
-
                         <!-- Group Count -->
                         <ObjectStatus
                             class="sapUiTinyMarginEnd"
@@ -85,13 +86,25 @@
                                 type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
-                            <Button
+                            <MenuButton
+                            id="navDropdownMaterial"
                             icon="sap-icon://switch-views"
-                            text="Customer"
-                            press="onVendorPage"
-                            type="Attention"
-                            class="sapUiSmallMarginEnd"
-                        />
+                            text="Go to"
+                            type="Transparent"
+                            class="sapUiSmallMarginEnd customNavButton">
+                            <menu>
+                                <Menu>
+                                    <MenuItem 
+                                        text="Customer" 
+                                        icon="sap-icon://supplier"
+                                        press="onCustomerPage"/>
+                                    <MenuItem 
+                                        text="Vendor" 
+                                        icon="sap-icon://product"
+                                        press="onVendorPage"/>
+                                </Menu>
+                            </menu>
+                        </MenuButton>
                     </HBox>
                     </Toolbar>
 

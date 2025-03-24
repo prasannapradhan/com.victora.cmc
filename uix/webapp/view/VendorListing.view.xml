@@ -85,13 +85,25 @@
                             />
                         
                             <!-- Customer Button -->
-                            <Button
-                                icon="sap-icon://switch-views"
-                                text="Customer"
-                                press="onVendorPage"
-                                type="Attention"
-                                class="sapUiSmallMarginEnd"
-                            />
+                            <MenuButton
+                            id="navDropdownVendor"
+                            icon="sap-icon://switch-views"
+                            text="Go to"
+                            type="Transparent"
+                            class="sapUiSmallMarginEnd customNavButton">
+                            <menu>
+                                <Menu>
+                                    <MenuItem 
+                                        text="Customer" 
+                                        icon="sap-icon://supplier"
+                                        press="onCustomerPage"/>
+                                    <MenuItem 
+                                        text="Material" 
+                                        icon="sap-icon://product"
+                                        press="onMeterialPage"/>
+                                </Menu>
+                            </menu>
+                        </MenuButton>
                         </HBox>
                     </Toolbar>
 

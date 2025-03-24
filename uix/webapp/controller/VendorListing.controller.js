@@ -172,12 +172,24 @@ sap.ui.define([
             _v.getModel("vcfg").refresh(true);
         },
 
-        onVendorPage: function () {
+        onCustomerPage: function () {
             var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
             sap.ui.core.BusyIndicator.show(0);
             setTimeout(function () {
                 sap.ui.core.BusyIndicator.hide();
                 oRouter.navTo("CustomerListing");
+            }, 1000);
+        },
+
+        onMeterialPage: function () {
+            var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+            var oView = this.getView();
+
+            sap.ui.core.BusyIndicator.show(0);
+
+            setTimeout(function () {
+                sap.ui.core.BusyIndicator.hide();
+                oRouter.navTo("MeterialListing");
             }, 1000);
         },
 
