@@ -1,0 +1,92 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+          xmlns="sap.m"
+          controllerName="sap.ui.demo.controller.Home">
+    
+    <Page title="Loading Data...">
+        <Toolbar class="sapUiSmallMarginBottom sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd">
+            <!-- Filter Dropdown -->
+            <Select
+                id="filterSelectHome"
+                width="12rem"
+                change="onFilterChange"
+                class="sapUiSmallMarginEnd"
+            >
+                <items>
+                    <core:Item key="All" text="All Materials" />
+                    <core:Item key="Type1" text="Type 1" />
+                    <core:Item key="Type2" text="Type 2" />
+                </items>
+            </Select>
+
+            <!-- Group Count -->
+            <ObjectStatus
+                class="sapUiTinyMarginEnd"
+                text="{vcfg>/groupCountText}"
+                state="Warning"
+                inverted="true"
+            />
+
+            <!-- Material Count -->
+            <ObjectStatus
+                class="sapUiTinyMarginEnd"
+                text="{vcfg>/materialCountText}"
+                state="Warning"
+                inverted="true"
+            />
+
+            <!-- Threshold Input -->
+            <Text text="Similarity"  class="sapUiTinyMarginEnd" />
+            <Input
+                width="4rem"
+                value="{vcfg>/threshold}"
+                type="Text"
+                placeholder="Threshold"
+                class="sapUiTinyMarginEnd"
+                change="handleMaterialThresholdChange"
+                textAlign="Center"
+            />
+
+            <!-- Apply Button -->
+            <Button
+                text="Apply"
+                press="handleMaterialThresholdChange"
+                type="Emphasized"
+                class="sapUiTinyMarginEnd" 
+            />
+
+            <!-- Spacer -->
+            <ToolbarSpacer />
+
+            <!-- Download All Button -->
+            <HBox alignItems="Center" 
+                class="sapUiResponsivePadding sapUiTinyMargin">
+                <!-- Download All Button -->
+                <Button
+                    icon="sap-icon://download"
+                    text="Download All"
+                    press="downloadAllMaterials"
+                    type="Emphasized"
+                    class="sapUiSmallMarginEnd"
+                />
+            
+                <!-- Download Group Button -->
+                <Button
+                    icon="sap-icon://download"
+                    text="Download Group"
+                    press=".downloadGroupMaterials"
+                    type="Emphasized"
+                    class="sapUiSmallMarginEnd"
+                />
+                <Button
+                icon="sap-icon://switch-views"
+                text="Customer"
+                press="onVendorPage"
+                type="Attention"
+                class="sapUiSmallMarginEnd"
+            />
+        </HBox>
+        </Toolbar>
+
+    </Page>
+
+</mvc:View>

@@ -7,7 +7,7 @@
     controllerName="com.victora.cmc.uix.controller.MeterialListing"
 >
     <App>
-        <Page title="Duplicate Meterial Groups">
+        <Page title="Duplicate Material Groups">
             <content>
                 <VBox>
                     <!-- Enhanced Toolbar -->
@@ -20,9 +20,9 @@
                             class="sapUiSmallMarginEnd"
                         >
                             <items>
-                                <core:Item key="All" text="All Customers" />
-                                <core:Item key="National" text="National (India)" />
-                                <core:Item key="International" text="International" />
+                                <core:Item key="All" text="All Materials" />
+                                <core:Item key="Type1" text="Type 1" />
+                                <core:Item key="Type2" text="Type 2" />
                             </items>
                         </Select>
 
@@ -34,10 +34,10 @@
                             inverted="true"
                         />
 
-                        <!-- Customer Count -->
+                        <!-- Material Count -->
                         <ObjectStatus
                             class="sapUiTinyMarginEnd"
-                            text="{vcfg>/customerCountText}"
+                            text="{vcfg>/materialCountText}"
                             state="Warning"
                             inverted="true"
                         />
@@ -50,14 +50,14 @@
                             type="Text"
                             placeholder="Threshold"
                             class="sapUiTinyMarginEnd"
-                            change="handleCustomerThresholdChange"
+                            change="handleMaterialThresholdChange"
                             textAlign="Center"
                         />
 
                         <!-- Apply Button -->
                         <Button
                             text="Apply"
-                            press="handleCustomerThresholdChange"
+                            press="handleMaterialThresholdChange"
                             type="Emphasized"
                             class="sapUiTinyMarginEnd" 
                         />
@@ -66,13 +66,13 @@
                         <ToolbarSpacer />
 
                         <!-- Download All Button -->
-                     <HBox alignItems="Center" 
-                        class="sapUiResponsivePadding sapUiTinyMargin">
+                        <HBox alignItems="Center" 
+                            class="sapUiResponsivePadding sapUiTinyMargin">
                             <!-- Download All Button -->
                             <Button
                                 icon="sap-icon://download"
                                 text="Download All"
-                                press="downloadAllCustomers"
+                                press="downloadAllMaterials"
                                 type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
@@ -81,20 +81,18 @@
                             <Button
                                 icon="sap-icon://download"
                                 text="Download Group"
-                                press=".downloadGroupCustomers"
+                                press=".downloadGroupMaterials"
                                 type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
-                        
-                            <!-- Vendor Button -->
                             <Button
-                                icon="sap-icon://switch-views"
-                                text="Customer"
-                                press="onVendorPage"
-                                type="Attention"
-                                class="sapUiSmallMarginEnd"
-                            />
-                        </HBox>
+                            icon="sap-icon://switch-views"
+                            text="Customer"
+                            press="onVendorPage"
+                            type="Attention"
+                            class="sapUiSmallMarginEnd"
+                        />
+                    </HBox>
                     </Toolbar>
 
                     <!-- FlexBox for List and Table -->
@@ -105,8 +103,8 @@
                     >
                         <!-- Suspect List -->
                         <ScrollContainer
-                            width="20rem"
-                            height="84vh"
+                            width="auto"
+                            height="85vh"
                             vertical="true"
                         >
                             <List
@@ -151,30 +149,23 @@
                                 </table:Column>
 
                                 <table:Column width="auto">
-                                    <Label text="Address" />
+                                    <Label text="Description" />
                                     <table:template>
-                                        <Text text="{details>Address}" />
+                                        <Text text="{details>Description}" />
                                     </table:template>
                                 </table:Column>
 
                                 <table:Column width="8rem">
-                                    <Label text="Customer ID" />
+                                    <Label text="Material ID" />
                                     <table:template>
-                                        <Text text="{details>CustomerId}" />
+                                        <Text text="{details>Number}" />
                                     </table:template>
                                 </table:Column>
 
                                 <table:Column width="18rem">
-                                    <Label text="Name" />
+                                    <Label text="Type" />
                                     <table:template>
-                                        <Text text="{details>Name}" />
-                                    </table:template>
-                                </table:Column>
-
-                                <table:Column width="5rem">
-                                    <Label text="Region" />
-                                    <table:template>
-                                        <Text text="{details>Region}" />
+                                        <Text text="{details>Type}" />
                                     </table:template>
                                 </table:Column>
                             </table:columns>
