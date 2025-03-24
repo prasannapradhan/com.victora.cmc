@@ -84,6 +84,13 @@
           "target": [
             "TargetVendorListing"
           ]
+        },
+        {
+          "name": "MeterialListing",
+          "pattern": "MeterialListing",
+          "target": [
+            "MeterialListing"
+          ]
         }
       ],
     "targets": {
@@ -100,6 +107,13 @@
     "clearControlAggregation": true,
     "viewId": "VendorListing",
     "viewName": "VendorListing"
+  },
+  "MeterialListing": {
+    "viewType": "XML",
+    "transition": "slide",
+    "clearControlAggregation": true,
+    "viewId": "MeterialListing",
+    "viewName": "MeterialListing"
   }
 }
     },

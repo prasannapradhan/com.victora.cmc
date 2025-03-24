@@ -4,23 +4,23 @@
     xmlns:core="sap.ui.core"
     xmlns:table="sap.ui.table"
     xmlns:l="sap.ui.layout"
-    controllerName="com.victora.cmc.uix.controller.VendorListing"
+    controllerName="com.victora.cmc.uix.controller.MeterialListing"
 >
     <App>
-        <Page title="Duplicate Vendor Groups">
+        <Page title="Duplicate Meterial Groups">
             <content>
                 <VBox>
                     <!-- Enhanced Toolbar -->
                     <Toolbar class="sapUiSmallMarginBottom sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd">
                         <!-- Filter Dropdown -->
                         <Select
-                            id="vendorFilterSelect"
+                            id="filterSelectUnique"
                             width="12rem"
                             change="onFilterChange"
                             class="sapUiSmallMarginEnd"
                         >
                             <items>
-                                <core:Item key="All" text="All Vendors" />
+                                <core:Item key="All" text="All Customers" />
                                 <core:Item key="National" text="National (India)" />
                                 <core:Item key="International" text="International" />
                             </items>
@@ -34,43 +34,45 @@
                             inverted="true"
                         />
 
-                        <!-- Vendor Count -->
+                        <!-- Customer Count -->
                         <ObjectStatus
                             class="sapUiTinyMarginEnd"
-                            text="{vcfg>/vendorCountText}"
+                            text="{vcfg>/customerCountText}"
                             state="Warning"
                             inverted="true"
                         />
 
                         <!-- Threshold Input -->
+                        <Text text="Similarity"  class="sapUiTinyMarginEnd" />
                         <Input
-                            width="6rem"
+                            width="4rem"
                             value="{vcfg>/threshold}"
                             type="Text"
                             placeholder="Threshold"
                             class="sapUiTinyMarginEnd"
-                            change="handleVendorThresholdChange"
+                            change="handleCustomerThresholdChange"
                             textAlign="Center"
                         />
 
                         <!-- Apply Button -->
                         <Button
                             text="Apply"
-                            press="handleVendorThresholdChange"
+                            press="handleCustomerThresholdChange"
                             type="Emphasized"
-                            class="sapUiTinyMarginEnd"
+                            class="sapUiTinyMarginEnd" 
                         />
 
                         <!-- Spacer -->
                         <ToolbarSpacer />
 
                         <!-- Download All Button -->
-                        <HBox alignItems="Center" 
+                     <HBox alignItems="Center" 
                         class="sapUiResponsivePadding sapUiTinyMargin">
+                            <!-- Download All Button -->
                             <Button
                                 icon="sap-icon://download"
                                 text="Download All"
-                                press="downloadAllVendors"
+                                press="downloadAllCustomers"
                                 type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
@@ -79,12 +81,12 @@
                             <Button
                                 icon="sap-icon://download"
                                 text="Download Group"
-                                press=".downloadGroupVendors"
+                                press=".downloadGroupCustomers"
                                 type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
                         
-                            <!-- Customer Button -->
+                            <!-- Vendor Button -->
                             <Button
                                 icon="sap-icon://switch-views"
                                 text="Customer"
@@ -108,7 +110,7 @@
                             vertical="true"
                         >
                             <List
-                                id="suspectListDuplicate"
+                                id="suspectListUnique"
                                 items="{cmc>/suspects}"
                                 mode="SingleSelectMaster"
                                 selectionChange="onSelectionChange"
@@ -120,14 +122,14 @@
 
                         <!-- Suspect Details Table -->
                         <table:Table
-                            id="suspectDetailsTableDuplicate"
+                            id="suspectDetailsTableUnique"
                             rows="{details>/selectedSuspects}"
                             selectionMode="None"
                             width="auto"
                         >
                             <table:columns>
                                 <table:Column width="6rem">
-                                    <Label text="Match (%)" />
+                                    <Label text="Match Group" />
                                     <table:template>
                                         <l:HorizontalLayout>
                                             <l:content>
@@ -156,9 +158,9 @@
                                 </table:Column>
 
                                 <table:Column width="8rem">
-                                    <Label text="Vendor ID" />
+                                    <Label text="Customer ID" />
                                     <table:template>
-                                        <Text text="{details>VendorId}" />
+                                        <Text text="{details>CustomerId}" />
                                     </table:template>
                                 </table:Column>
 

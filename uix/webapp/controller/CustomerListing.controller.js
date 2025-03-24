@@ -108,7 +108,7 @@ sap.ui.define([
                             s.MatchGroup = "P_" + _cfg.threshold + "_" + similarityCtr;
                             alternateSuspects.push(s);
                         } else {
-                            let similarity = _cref.calculateAddressSimilarity(suspects[0].StreetAdd, s.StreetAdd);
+                            let similarity = GeneralUtils.calculateAddressSimilarity(suspects[0].StreetAdd, s.StreetAdd);
                             if (similarity >= _cfg.threshold) {
                                 s.MatchGroup = "P_" + _cfg.threshold + "_" + similarityCtr;
                                 s.Duplicate = true;
@@ -142,44 +142,6 @@ sap.ui.define([
             _v.setModel(new JSONModel({ suspects: filteredData }), "cmc");
         },
 
-        calculateLevenshteinDistance: function (str1, str2) {
-            let [m, n] = [str1.length, str2.length], dp = Array(m + 1).fill().map(() => Array(n + 1).fill(0));
-            for (let i = 0; i <= m; i++) dp[i][0] = i;
-            for (let j = 0; j <= n; j++) dp[0][j] = j;
-            for (let i = 1; i <= m; i++) {
-                for (let j = 1; j <= n; j++) {
-                    dp[i][j] = str1[i - 1] === str2[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
-                }
-            }
-            return dp[m][n];
-        },
-
-        calculateAddressSimilarity: function (addr1, addr2) {
-            if (!addr1 || !addr2) return 0;
-
-            // Ensure addr1 is always the shorter string
-            if (addr1.length > addr2.length) {
-                [addr1, addr2] = [addr2, addr1]; // Swap to maintain order
-            }
-            // Check if the shorter address is a substring of the longer address
-            if (addr2.includes(addr1)) {
-                return 100; // Exact substring match
-            }
-            let tokens1 = addr1.split(/\s+/);
-            let tokens2 = addr2.split(/\s+/);
-
-            let allTokensMatch = tokens1.every(token => tokens2.includes(token));
-            if (allTokensMatch) {
-                return 100; // All tokens of the shorter address are present in the longer address
-            }
-            // Calculate Levenshtein distance for partial matches
-            let maxLength = addr2.length;
-            let distance = this.calculateLevenshteinDistance(addr1, addr2);
-            let similarityScore = ((maxLength - distance) / maxLength) * 100;
-
-            return similarityScore.toFixed(2);
-        },
-
         onSelectionChange: function (oEvent) {
             let sKey = oEvent.getParameter("listItem").getBindingContext("cmc").getProperty("key");
             _v.getModel("cmc").setProperty("/selectedKey", sKey);
@@ -210,18 +172,6 @@ sap.ui.define([
             }
             sap.ui.core.BusyIndicator.hide();
             _v.getModel("vcfg").refresh(true);
-        },
-
-        onCustomerPage: function () {
-            var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
-            var oView = this.getView();
-
-            sap.ui.core.BusyIndicator.show(0);
-
-            setTimeout(function () {
-                sap.ui.core.BusyIndicator.hide();
-                oRouter.navTo("VendorListing");
-            }, 1000);
         },
 
         downloadAllCustomers: function () {
@@ -377,26 +327,31 @@ sap.ui.define([
             MessageToast.show("Group data has been exported to " + filename);
         },
 
-        formatMatchGroupState: function (matchGroup) {
-            if (!matchGroup) return "None"; // No color if no match group
+        
+        onCustomerPage: function () {
+            var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+            var oView = this.getView();
 
-            // Extract the similarity threshold and group number from the MatchGroup value
-            let matchParts = matchGroup.split("_");
-            if (matchParts.length >= 3) {
-                let groupNumber = matchParts[2]; // Get the group number (e.g., 1, 2, 3, etc.)
+            sap.ui.core.BusyIndicator.show(0);
 
-                // Assign different states (colors) based on the group number
-                switch (groupNumber % 5) { // Use modulo to cycle through 5 colors
-                    case 1: return "Success"; // Green
-                    case 2: return "Warning"; // Yellow
-                    case 3: return "Error";   // Red
-                    case 4: return "Information"; // Blue
-                    case 0: return "Indication07"; // Purple
-                    default: return "None";
-                }
-            }
-            return "None"; // Default no color
+            setTimeout(function () {
+                sap.ui.core.BusyIndicator.hide();
+                oRouter.navTo("VendorListing");
+            }, 1000);
         },
+
+        onMeterialPage: function () {
+            var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+            var oView = this.getView();
+
+            sap.ui.core.BusyIndicator.show(0);
+
+            setTimeout(function () {
+                sap.ui.core.BusyIndicator.hide();
+                oRouter.navTo("MeterialListing");
+            }, 1000);
+        }
+
 
     });
 });

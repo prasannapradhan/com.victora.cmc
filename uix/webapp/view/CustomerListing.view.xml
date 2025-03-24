@@ -94,6 +94,14 @@
                                 type="Attention"
                                 class="sapUiSmallMarginEnd"
                             />
+
+                            <Button
+                                icon="sap-icon://switch-views"
+                                text="Meterial"
+                                press="onMeterialPage"
+                                type="Attention"
+                                class="sapUiSmallMarginEnd"
+                            />
                         </HBox>
                     </Toolbar>
 
@@ -105,7 +113,7 @@
                     >
                         <!-- Suspect List -->
                         <ScrollContainer
-                            width="18rem"
+                            width="20rem"
                             height="84vh"
                             vertical="true"
                         >
