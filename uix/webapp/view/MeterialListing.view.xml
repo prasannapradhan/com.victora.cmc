@@ -11,7 +11,9 @@
             <content>
                 <VBox>
                     <!-- Enhanced Toolbar -->
-                    <Toolbar class="sapUiSmallMarginBottom sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd">
+                    <Toolbar
+                        class="sapUiSmallMarginBottom sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd"
+                    >
                         <!-- Filter Dropdown -->
                         <Select
                             id="typeFilterSelect"
@@ -21,11 +23,15 @@
                             items="{
                                 path: 'vcfg>/availableTypes',
                                 templateShareable: false
-                            }">
-                            <core:Item key="{vcfg>}" text="{
+                            }"
+                        >
+                            <core:Item
+                                key="{vcfg>}"
+                                text="{
                                 path: 'vcfg>',
                                 formatter: '.formatTypeText'
-                            }"/>
+                            }"
+                            />
                         </Select>
                         <!-- Group Count -->
                         <ObjectStatus
@@ -44,7 +50,10 @@
                         />
 
                         <!-- Threshold Input -->
-                        <Text text="Similarity"  class="sapUiTinyMarginEnd" />
+                        <Text
+                            text="Similarity"
+                            class="sapUiTinyMarginEnd"
+                        />
                         <Input
                             width="4rem"
                             value="{vcfg>/threshold}"
@@ -60,15 +69,17 @@
                             text="Apply"
                             press="handleMaterialThresholdChange"
                             type="Emphasized"
-                            class="sapUiTinyMarginEnd" 
+                            class="sapUiTinyMarginEnd"
                         />
 
                         <!-- Spacer -->
                         <ToolbarSpacer />
 
                         <!-- Download All Button -->
-                        <HBox alignItems="Center" 
-                            class="sapUiResponsivePadding sapUiTinyMargin">
+                        <HBox
+                            alignItems="Center"
+                            class="sapUiResponsivePadding sapUiTinyMargin"
+                        >
                             <!-- Download All Button -->
                             <Button
                                 icon="sap-icon://download"
@@ -77,7 +88,7 @@
                                 type="Emphasized"
                                 class="sapUiSmallMarginEnd"
                             />
-                        
+
                             <!-- Download Group Button -->
                             <Button
                                 icon="sap-icon://download"
@@ -87,25 +98,28 @@
                                 class="sapUiSmallMarginEnd"
                             />
                             <MenuButton
-                            id="navDropdownMaterial"
-                            icon="sap-icon://switch-views"
-                            text="Go to"
-                            type="Transparent"
-                            class="sapUiSmallMarginEnd customNavButton">
-                            <menu>
-                                <Menu>
-                                    <MenuItem 
-                                        text="Customer" 
-                                        icon="sap-icon://customer"
-                                        press="onCustomerPage"/>
-                                    <MenuItem 
-                                        text="Vendor" 
-                                        icon="sap-icon://supplier"
-                                        press="onVendorPage"/>
-                                </Menu>
-                            </menu>
-                        </MenuButton>
-                    </HBox>
+                                id="navDropdownMaterial"
+                                icon="sap-icon://switch-views"
+                                text="Go to"
+                                type="Transparent"
+                                class="sapUiSmallMarginEnd customNavButton"
+                            >
+                                <menu>
+                                    <Menu>
+                                        <MenuItem
+                                            text="Customer"
+                                            icon="sap-icon://customer"
+                                            press="onCustomerPage"
+                                        />
+                                        <MenuItem
+                                            text="Vendor"
+                                            icon="sap-icon://supplier"
+                                            press="onVendorPage"
+                                        />
+                                    </Menu>
+                                </menu>
+                            </MenuButton>
+                        </HBox>
                     </Toolbar>
 
                     <!-- FlexBox for List and Table -->
@@ -115,7 +129,11 @@
                         fitContainer="true"
                     >
                         <!-- Suspect List -->
-                        <ScrollContainer width="20rem" height="85vh" vertical="true">
+                        <ScrollContainer
+                            width="25rem"
+                            height="85vh"
+                            vertical="true"
+                        >
                             <List
                                 id="suspectListUnique"
                                 items="{
@@ -127,13 +145,15 @@
                                 growing="true"
                                 growingThreshold="20"
                                 growingScrollToLoad="true"
-                                updateFinished="onListUpdateFinished">
+                                updateFinished="onListUpdateFinished"
+                            >
                                 <CustomListItem>
                                     <VBox class="sapUiSmallMargin">
-                                        <Text 
-                                            text="{cmc>displayKey}" 
+                                        <Text
+                                            text="{cmc>displayKey}"
                                             wrapping="true"
-                                            class="sapUiTinyMarginBottom"/>
+                                            class="sapUiTinyMarginBottom"
+                                        />
                                     </VBox>
                                 </CustomListItem>
                             </List>
@@ -183,7 +203,7 @@
                                     </table:template>
                                 </table:Column>
 
-                                <table:Column width="18rem">
+                                <table:Column width="5rem">
                                     <Label text="Type" />
                                     <table:template>
                                         <Text text="{details>Type}" />
