@@ -115,19 +115,27 @@
                         fitContainer="true"
                     >
                         <!-- Suspect List -->
-                        <ScrollContainer
-                            width="auto"
-                            height="85vh"
-                            vertical="true"
-                        >
+                        <ScrollContainer width="20rem" height="85vh" vertical="true">
                             <List
                                 id="suspectListUnique"
-                                items="{cmc>/suspects}"
+                                items="{
+                                    path: 'cmc>/suspects',
+                                    templateShareable: false
+                                }"
                                 mode="SingleSelectMaster"
                                 selectionChange="onSelectionChange"
-                                growing="false"
-                            >
-                                <StandardListItem title="{cmc>displayKey}" />
+                                growing="true"
+                                growingThreshold="20"
+                                growingScrollToLoad="true"
+                                updateFinished="onListUpdateFinished">
+                                <CustomListItem>
+                                    <VBox class="sapUiSmallMargin">
+                                        <Text 
+                                            text="{cmc>displayKey}" 
+                                            wrapping="true"
+                                            class="sapUiTinyMarginBottom"/>
+                                    </VBox>
+                                </CustomListItem>
                             </List>
                         </ScrollContainer>
 
@@ -168,7 +176,7 @@
                                     </table:template>
                                 </table:Column>
 
-                                <table:Column width="8rem">
+                                <table:Column width="14rem">
                                     <Label text="Material ID" />
                                     <table:template>
                                         <Text text="{details>Number}" />

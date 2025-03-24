@@ -55,3 +55,6 @@ background-color: var(--sapButton_Lite_Background);
 color: #f5f6f7 !important;
 }
 
+.sapUiSmallMargin {
+  margin: 10px !important;
+}

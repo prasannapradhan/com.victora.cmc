@@ -70,12 +70,32 @@ sap.ui.define([
             
             let materialMap = {};
             let uniqueTypes = new Set();
-
+            
+            // Initialize counters
+            let totalRecords = materialData.length;
+            let blankDescriptionCount = 0;
+            let hashDescriptionCount = 0;
+            let validRecordsCount = 0;
+        
             materialData.forEach(e => {
-                // Skip if description is blank or less than 2 characters
-                if (!e.Description || e.Description.trim().length < 2) {
+                // Count blank descriptions
+                if (!e.Description || e.Description.trim().length === 0) {
+                    blankDescriptionCount++;
                     return;
                 }
+                
+                // Count descriptions with only "#"
+                if (e.Description.trim() === "#") {
+                    hashDescriptionCount++;
+                    return;
+                }
+                
+                // Count valid records
+                if (e.Description.trim().length < 2) {
+                    return;
+                }
+                
+                validRecordsCount++;
                 
                 // Add type to unique types set
                 if (e.Type) {
@@ -84,13 +104,32 @@ sap.ui.define([
                 
                 // Clean up Description for display
                 e.Description = e.Description.replace(/[^a-zA-Z0-9]/g, " ").trim().replace(/\s+/g, " ");
-        
+            
                 // Group data by Type and Description
                 if (!materialMap[e.Type]) materialMap[e.Type] = {};
                 if (!materialMap[e.Type][e.Description]) materialMap[e.Type][e.Description] = [];
                 materialMap[e.Type][e.Description].push(e);
             });
-
+        
+            // Log the statistics
+            console.log("=== DATA STATISTICS ===");
+            console.log("Total records in JSON:", totalRecords);
+            console.log("Records with blank description:", blankDescriptionCount);
+            console.log("Records with '#' description:", hashDescriptionCount);
+            console.log("Records with valid description:", validRecordsCount);
+            console.log("Records skipped (short descriptions):", totalRecords - blankDescriptionCount - hashDescriptionCount - validRecordsCount);
+            
+            // Log sample data (first 5 records)
+            console.log("=== SAMPLE DATA (first 5 records) ===");
+            materialData.slice(0, 5).forEach((item, index) => {
+                console.log(`Record ${index + 1}:`, {
+                    Number: item.Number,
+                    Type: item.Type,
+                    Description: item.Description,
+                    Name: item.Name
+                });
+            });
+        
             // Convert Set to array and sort alphabetically
             _cfg.availableTypes = ["All", ...Array.from(uniqueTypes).sort()];
             console.log("All available material types:", _cfg.availableTypes.slice(1)); // Exclude "All" from console log
