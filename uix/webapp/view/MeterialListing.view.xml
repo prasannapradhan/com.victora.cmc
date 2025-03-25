@@ -202,13 +202,6 @@
                                         <Text text="{details>Number}" />
                                     </table:template>
                                 </table:Column>
-
-                                <table:Column width="5rem">
-                                    <Label text="Type" />
-                                    <table:template>
-                                        <Text text="{details>Type}" />
-                                    </table:template>
-                                </table:Column>
                             </table:columns>
                         </table:Table>
                     </FlexBox>
