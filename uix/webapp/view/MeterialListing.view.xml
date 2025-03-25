@@ -135,16 +135,13 @@
                             vertical="true"
                         >
                             <List
-                                id="suspectListUnique"
                                 items="{
                                     path: 'cmc>/suspects',
                                     templateShareable: false
                                 }"
                                 mode="SingleSelectMaster"
                                 selectionChange="onSelectionChange"
-                                growing="true"
-                                growingThreshold="20"
-                                growingScrollToLoad="true"
+                                growing="false"
                                 updateFinished="onListUpdateFinished"
                             >
                                 <CustomListItem>
