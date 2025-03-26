@@ -76,50 +76,38 @@
                         <ToolbarSpacer />
 
                         <!-- Download All Button -->
-                        <HBox
-                            alignItems="Center"
-                            class="sapUiResponsivePadding sapUiTinyMargin"
+                        <Button
+                            icon="sap-icon://download"
+                            text="Download All"
+                            press="downloadAllMaterials"
+                            type="Emphasized"
+                        />
+                        <!-- Download Group Button -->
+                        <Button
+                            icon="sap-icon://download"
+                            text="Download Selection"
+                            press=".downloadGroupMaterials"
+                            type="Emphasized"
+                        />
+                        <MenuButton
+                            text="GoTo"
+                            type="Emphasized"
+                            class="customNavButton"
+                            buttonMode="Split"
                         >
-                            <!-- Download All Button -->
-                            <Button
-                                icon="sap-icon://download"
-                                text="Download All"
-                                press="downloadAllMaterials"
-                                type="Emphasized"
-                                class="sapUiSmallMarginEnd"
-                            />
-
-                            <!-- Download Group Button -->
-                            <Button
-                                icon="sap-icon://download"
-                                text="Download Group"
-                                press=".downloadGroupMaterials"
-                                type="Emphasized"
-                                class="sapUiSmallMarginEnd"
-                            />
-                            <MenuButton
-                                id="navDropdownMaterial"
-                                icon="sap-icon://switch-views"
-                                text="Go to"
-                                type="Transparent"
-                                class="sapUiSmallMarginEnd customNavButton"
-                            >
-                                <menu>
-                                    <Menu>
-                                        <MenuItem
-                                            text="Customer"
-                                            icon="sap-icon://customer"
-                                            press="onCustomerPage"
-                                        />
-                                        <MenuItem
-                                            text="Vendor"
-                                            icon="sap-icon://supplier"
-                                            press="onVendorPage"
-                                        />
-                                    </Menu>
-                                </menu>
-                            </MenuButton>
-                        </HBox>
+                            <menu>
+                                <Menu>
+                                    <MenuItem
+                                        text="Customer"
+                                        press="onCustomerPage"
+                                    />
+                                    <MenuItem
+                                        text="Vendor"
+                                        press="onVendorPage"
+                                    />
+                                </Menu>
+                            </menu>
+                        </MenuButton>
                     </Toolbar>
 
                     <!-- FlexBox for List and Table -->

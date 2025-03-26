@@ -65,46 +65,39 @@
                         <ToolbarSpacer />
 
                         <!-- Download All Button -->
-                        <HBox alignItems="Center" 
-                        class="sapUiResponsivePadding sapUiTinyMargin">
-                            <Button
-                                icon="sap-icon://download"
-                                text="Download All"
-                                press="downloadAllVendors"
-                                type="Emphasized"
-                                class="sapUiSmallMarginEnd"
-                            />
-                        
-                            <!-- Download Group Button -->
-                            <Button
-                                icon="sap-icon://download"
-                                text="Download Group"
-                                press=".downloadGroupVendors"
-                                type="Emphasized"
-                                class="sapUiSmallMarginEnd"
-                            />
-                        
-                            <!-- Customer Button -->
-                            <MenuButton
-                            id="navDropdownVendor"
-                            icon="sap-icon://switch-views"
-                            text="Go to"
-                            type="Transparent"
-                            class="sapUiSmallMarginEnd customNavButton">
+                        <Button
+                            icon="sap-icon://download"
+                            text="Download All"
+                            press="downloadAllVendors"
+                            type="Emphasized"
+                            class="sapUiSmallMarginEnd"
+                        />
+                        <!-- Download Group Button -->
+                        <Button
+                            icon="sap-icon://download"
+                            text="Download Selection"
+                            press=".downloadGroupVendors"
+                            type="Emphasized"
+                            class="sapUiSmallMarginEnd"
+                        />
+                        <!-- Customer Button -->
+                        <MenuButton
+                            text="GoTo"
+                            type="Emphasized"
+                            class="customNavButton"
+                            buttonMode="Split"
+                            >
                             <menu>
                                 <Menu>
                                     <MenuItem 
                                         text="Customer" 
-                                        icon="sap-icon://customer"
                                         press="onCustomerPage"/>
                                     <MenuItem 
                                         text="Material" 
-                                        icon="sap-icon://product"
                                         press="onMeterialPage"/>
                                 </Menu>
                             </menu>
                         </MenuButton>
-                        </HBox>
                     </Toolbar>
 
                     <!-- FlexBox for List and Table -->
