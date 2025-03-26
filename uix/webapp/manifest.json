@@ -86,10 +86,10 @@
           ]
         },
         {
-          "name": "MeterialListing",
-          "pattern": "MeterialListing",
+          "name": "MaterialListing",
+          "pattern": "MaterialListing",
           "target": [
-            "MeterialListing"
+            "MaterialListing"
           ]
         }
       ],
@@ -108,12 +108,12 @@
     "viewId": "VendorListing",
     "viewName": "VendorListing"
   },
-  "MeterialListing": {
+  "MaterialListing": {
     "viewType": "XML",
     "transition": "slide",
     "clearControlAggregation": true,
-    "viewId": "MeterialListing",
-    "viewName": "MeterialListing"
+    "viewId": "MaterialListing",
+    "viewName": "MaterialListing"
   }
 }
     },

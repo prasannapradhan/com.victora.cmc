@@ -14,7 +14,7 @@ sap.ui.define([
     var __defaultSimilarity = 95;
     var _cfg = {};
 
-    return Controller.extend("com.victora.cmc.uix.controller.MeterialListing", {
+    return Controller.extend("com.victora.cmc.uix.controller.MaterialListing", {
         onInit: function () {
             _cref = this;
             _v = this.getView();

@@ -348,7 +348,7 @@ sap.ui.define([
 
             setTimeout(function () {
                 sap.ui.core.BusyIndicator.hide();
-                oRouter.navTo("MeterialListing");
+                oRouter.navTo("MaterialListing");
             }, 1000);
         }
 
