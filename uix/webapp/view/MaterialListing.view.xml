@@ -148,7 +148,7 @@
                         >
                             <table:columns>
                                 <table:Column width="6rem">
-                                    <Label text="Match Group" />
+                                    <Label text="Match Key" />
                                     <table:template>
                                         <l:HorizontalLayout>
                                             <l:content>

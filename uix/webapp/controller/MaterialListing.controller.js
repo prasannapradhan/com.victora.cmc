@@ -252,7 +252,7 @@ sap.ui.define([
                         let data = {
                             "Key": group.key,
                             "Type": group.type,
-                            "Match (%)": suspect.MatchGroup || "N/A",
+                            "Match Key": suspect.MatchGroup || "N/A",
                             "Description": suspect.Description,
                             "Material ID": suspect.Number,
                             "Name": suspect.Name
@@ -265,12 +265,12 @@ sap.ui.define([
             var filename = "Material_data-Export.xlsx";
             var wb = XLSX.utils.book_new();
             var headerData = [
-                ["Key", "Match (%)", "Material ID", "Description", "Type"]
+                ["Key", "Match Key", "Material ID", "Description", "Type"]
             ];
             allData.forEach(item => {
                 headerData.push([
                     item["Key"],
-                    item["Match (%)"],
+                    item["Match Key"],
                     item["Material ID"],
                     item["Description"],
                     item["Type"]
@@ -307,7 +307,7 @@ sap.ui.define([
                 let data = {
                     "Key": selectedGroup.key,
                     "Type": selectedGroup.type,
-                    "Match (%)": suspect.MatchGroup || "N/A",
+                    "Match Key": suspect.MatchGroup || "N/A",
                     "Description": suspect.Description,
                     "Material ID": suspect.Number,
                     "Name": suspect.Name
@@ -318,11 +318,11 @@ sap.ui.define([
             var filename = "material-duplicate-group-export.xlsx";
             var wb = XLSX.utils.book_new();
             var headerData = [
-                ["Match (%)", "Material ID", "Description", "Type"]
+                ["Match Key", "Material ID", "Description", "Type"]
             ];
             groupData.forEach(item => {
                 headerData.push([
-                    item["Match (%)"],
+                    item["Match Key"],
                     item["Material ID"],
                     item["Description"],
                     item["Type"]

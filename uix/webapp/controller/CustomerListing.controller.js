@@ -194,7 +194,7 @@ sap.ui.define([
                             "Country": group.country,
                             "Tax ID": suspect.TaxId,
                             "Pincode": suspect.Pincode,
-                            "Match Group": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
+                            "Match Key": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
                             "Address": suspect.Address,
                             "Customer ID": suspect.CustomerId,
                             "Name": suspect.Name,
@@ -213,13 +213,13 @@ sap.ui.define([
 
             // Define the header data
             var headerData = [
-                ["Group Key", "Match Group", "Customer ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
+                ["Group Key", "Match Key", "Customer ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
             ];
 
             allData.forEach(item => {
                 headerData.push([
                     item["Key"],
-                    item["Match Group"],
+                    item["Match Key"],
                     item["Customer ID"],
                     item["Name"],
                     item["Address"],
@@ -278,7 +278,7 @@ sap.ui.define([
                     "Country": selectedGroup.country,
                     "Tax ID": suspect.TaxId,
                     "Pincode": suspect.Pincode,
-                    "Match Group": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
+                    "Match Key": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
                     "Address": suspect.Address,
                     "Customer ID": suspect.CustomerId,
                     "Name": suspect.Name,
@@ -295,13 +295,13 @@ sap.ui.define([
 
             // Define the header data
             var headerData = [
-                ["Match Group", "Customer ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
+                ["Match Key", "Customer ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
             ];
 
             // Add the data rows to the headerData array
             groupData.forEach(item => {
                 headerData.push([
-                    item["Match Group"],
+                    item["Match Key"],
                     item["Customer ID"],
                     item["Name"],
                     item["Address"],

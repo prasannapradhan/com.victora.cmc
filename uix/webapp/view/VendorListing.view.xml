@@ -129,7 +129,7 @@
                         >
                             <table:columns>
                                 <table:Column width="6rem">
-                                    <Label text="Match (%)" />
+                                    <Label text="Match Key" />
                                     <table:template>
                                         <l:HorizontalLayout>
                                             <l:content>

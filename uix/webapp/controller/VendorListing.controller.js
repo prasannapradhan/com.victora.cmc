@@ -213,7 +213,7 @@ sap.ui.define([
                             "Country": group.country,
                             "Tax ID": suspect.TaxId,
                             "Pincode": suspect.Pincode,
-                            "Match (%)": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
+                            "Match Key": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
                             "Address": suspect.Address,
                             "Vendor ID": suspect.VendorId,
                             "Name": suspect.Name,
@@ -232,14 +232,14 @@ sap.ui.define([
 
             // Define the header data
             var headerData = [
-                ["Key", "Match (%)", "Vendor ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
+                ["Key", "Match Key", "Vendor ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
             ];
 
             // Add the data rows to the headerData array
             allData.forEach(item => {
                 headerData.push([
                     item["Key"],
-                    item["Match (%)"],
+                    item["Match Key"],
                     item["Vendor ID"],
                     item["Name"],
                     item["Address"],
@@ -293,7 +293,7 @@ sap.ui.define([
                     "Country": selectedGroup.country,
                     "Tax ID": suspect.TaxId,
                     "Pincode": suspect.Pincode,
-                    "Match (%)": suspect.MatchGroup || "N/A",
+                    "Match Key": suspect.MatchGroup || "N/A",
                     "Address": suspect.Address,
                     "Vendor ID": suspect.VendorId,
                     "Name": suspect.Name,
@@ -309,12 +309,12 @@ sap.ui.define([
             var wb = XLSX.utils.book_new();
             // Define the header data
             var headerData = [
-                ["Match (%)", "Vendor ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
+                ["Match Key", "Vendor ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
             ];
             // Add the data rows to the headerData array
             groupData.forEach(item => {
                 headerData.push([
-                    item["Match (%)"],
+                    item["Match Key"],
                     item["Vendor ID"],
                     item["Name"],
                     item["Address"],
