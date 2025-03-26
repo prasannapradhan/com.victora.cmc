@@ -18,46 +18,42 @@ sap.ui.define([
         onInit: function () {
             _cref = this;
             _v = this.getView();
-            
-            // Show loader immediately when controller initializes
+
             sap.ui.core.BusyIndicator.show(0);
-            
+
             this._allSuspectData = [];
+            this._typeGroupCounts = {}; // Store original type group counts
+            this._currentFilteredCount = 0; // Store current filtered count
 
             _cfg.threshold = __defaultSimilarity;
             _cfg.groupCountText = "";
             _cfg.materialCountText = "";
             _cfg.totalMaterialCnt = 0;
-            _cfg.availableTypes = ["All"]; // Initialize with "All" option
+            _cfg.availableTypes = ["All"];
 
-            _v.setModel(new JSONModel({ 
-                selectedSuspects: [], 
-                similarityThreshold: _cfg.threshold 
+            _v.setModel(new JSONModel({
+                selectedSuspects: [],
+                similarityThreshold: _cfg.threshold
             }), "details");
-            
+
             _v.setModel(new JSONModel(_cfg), "vcfg");
-            
-            // Show loader while loading data
+
             this.showMaterialListing();
         },
 
         showMaterialListing: async function () {
             try {
                 let materialModel = new JSONModel();
-                // Show loader before starting data load
                 sap.ui.core.BusyIndicator.show(0);
-                
+
                 await materialModel.loadData("/model/victora_material_master.json", false);
                 let materialData = materialModel.getData();
                 GeneralUtils.removeOdataResponseMetadata(materialData);
-                
-                // Process data while loader is still showing
+
                 this.processMaterialData(materialData.results || []);
-                
-                // Hide loader after processing is complete
+
                 sap.ui.core.BusyIndicator.hide();
             } catch (error) {
-                // Hide loader if there's an error
                 sap.ui.core.BusyIndicator.hide();
                 MessageBox.error("Failed to load material data.");
                 console.error("Error loading material data:", error);
@@ -65,101 +61,86 @@ sap.ui.define([
         },
 
         processMaterialData: function (materialData) {
-            // Show loader while processing data
             sap.ui.core.BusyIndicator.show(0);
-            
+
             let materialMap = {};
-            let uniqueTypes = new Set();
-            
+            this._typeGroupCounts = {}; // Reset type group counts
+
             // Initialize counters
             let totalRecords = materialData.length;
             let blankDescriptionCount = 0;
             let hashDescriptionCount = 0;
             let validRecordsCount = 0;
-        
+
             materialData.forEach(e => {
-                // Count blank descriptions
                 if (!e.Description || e.Description.trim().length === 0) {
                     blankDescriptionCount++;
                     return;
                 }
-                
-                // Count descriptions with only "#"
+
                 if (e.Description.trim() === "#") {
                     hashDescriptionCount++;
                     return;
                 }
-                
-                // Count valid records
+
                 if (e.Description.trim().length < 2) {
                     return;
                 }
-                
+
                 validRecordsCount++;
-                
-                // Add type to unique types set
-                if (e.Type) {
-                    uniqueTypes.add(e.Type);
-                }
-                
-                // Clean up Description for display
+
                 e.Description = e.Description.replace(/[^a-zA-Z0-9]/g, " ").trim().replace(/\s+/g, " ");
-            
-                // Group data by Type and Description
-                if (!materialMap[e.Type]) materialMap[e.Type] = {};
-                if (!materialMap[e.Type][e.Description]) materialMap[e.Type][e.Description] = [];
+
+                if (!materialMap[e.Type]) {
+                    materialMap[e.Type] = {};
+                    this._typeGroupCounts[e.Type] = 0;
+                }
+                if (!materialMap[e.Type][e.Description]) {
+                    materialMap[e.Type][e.Description] = [];
+                    this._typeGroupCounts[e.Type]++;
+                }
                 materialMap[e.Type][e.Description].push(e);
             });
-        
-            // Log the statistics
-            console.log("=== DATA STATISTICS ===");
-            console.log("Total records in JSON:", totalRecords);
-            console.log("Records with blank description:", blankDescriptionCount);
-            console.log("Records with '#' description:", hashDescriptionCount);
-            console.log("Records with valid description:", validRecordsCount);
-            console.log("Records skipped (short descriptions):", totalRecords - blankDescriptionCount - hashDescriptionCount - validRecordsCount);
-            
-            // Log sample data (first 5 records)
-            console.log("=== SAMPLE DATA (first 5 records) ===");
-            materialData.slice(0, 5).forEach((item, index) => {
-                console.log(`Record ${index + 1}:`, {
-                    Number: item.Number,
-                    Type: item.Type,
-                    Description: item.Description,
-                    Name: item.Name
-                });
-            });
-        
-            // Convert Set to array and sort alphabetically
-            _cfg.availableTypes = ["All", ...Array.from(uniqueTypes).sort()];
-            console.log("All available material types:", _cfg.availableTypes.slice(1)); // Exclude "All" from console log
-            
-            // Update available types in the model
+
+
+            // Filter out types with 0 groups and create availableTypes array
+            _cfg.availableTypes = [
+                { type: "All", count: Object.values(this._typeGroupCounts).reduce((a, b) => a + b, 0) },
+                ...Object.keys(this._typeGroupCounts)
+                    .filter(type => this._typeGroupCounts[type] > 0) // Only include types with groups
+                    .sort()
+                    .map(type => ({
+                        type: type,
+                        count: this._typeGroupCounts[type]
+                    }))
+            ];
+
             _v.getModel("vcfg").setProperty("/availableTypes", _cfg.availableTypes);
             _v.getModel("vcfg").refresh(true);
-            
+
             this.constructSuspectMap(materialMap);
         },
 
         constructSuspectMap: function (materialMap) {
-            _cref._allSuspectData = Object.entries(materialMap).flatMap(([type, descObj]) =>
+            this._allSuspectData = Object.entries(materialMap).flatMap(([type, descObj]) =>
                 Object.entries(descObj).flatMap(([description, suspects]) =>
                     suspects.length > 1 ? {
                         key: `${type}_${description}`,
                         type,
-                        displayKey: `${type}_${description} (${suspects.length})`,
+                        displayKey: `${description} (${suspects.length})`,
                         suspects
                     } : []
                 )
             );
-            
-            _cfg.groupCountText = "Groups: " + _cref._allSuspectData.length;
-            _cref.processSuspectData();
-            _cref.updateSuspectList("All");
+
+            this._currentFilteredCount = this._allSuspectData.length;
+            _cfg.groupCountText = "Groups: " + this._allSuspectData.length;
+            this.processSuspectData();
+            this.updateSuspectList("All");
         },
 
         processSuspectData: function () {
-            var svals = Object.values(_cref._allSuspectData);
+            var svals = Object.values(this._allSuspectData);
             for (let i = 0; i < svals.length; i++) {
                 const elem = svals[i];
                 _cfg.totalMaterialCnt += elem.suspects.length;
@@ -194,19 +175,20 @@ sap.ui.define([
 
         updateSuspectList: function (filterType) {
             let filteredData = this._allSuspectData;
-            
+
             if (filterType !== "All") {
                 filteredData = filteredData.filter(item => item.type === filterType);
             }
-            
+
+            this._currentFilteredCount = filteredData.length;
             _cfg.groupCountText = "Groups: " + filteredData.length;
             _cfg.totalMaterialCnt = filteredData.reduce((acc, item) => acc + item.suspects.length, 0);
             _cfg.materialCountText = "Materials: " + _cfg.totalMaterialCnt;
-            
+
             _v.getModel("vcfg").refresh(true);
-            _v.setModel(new JSONModel({ 
+            _v.setModel(new JSONModel({
                 suspects: filteredData,
-                selectedKey: null // Reset selection when filtering
+                selectedKey: null
             }), "cmc");
         },
 
@@ -216,7 +198,7 @@ sap.ui.define([
             let suspectData = this._allSuspectData.find(item => item.key === sKey);
             sap.ui.core.BusyIndicator.show(0);
             currNodeData = suspectData;
-            _cref.applySimilarityMatching();
+            this.applySimilarityMatching();
             sap.ui.core.BusyIndicator.hide();
         },
 
@@ -227,8 +209,8 @@ sap.ui.define([
         },
 
         handleMaterialThresholdChange: function () {
-            _cref.processSuspectData();
-            _cref.applySimilarityMatching();
+            this.processSuspectData();
+            this.applySimilarityMatching();
         },
 
         applySimilarityMatching: function () {
@@ -315,7 +297,7 @@ sap.ui.define([
                 groupData.push(data);
             });
 
-            var filename = "material-duplicate-group-export.xlsx";
+            var filename = "material-group-export.xlsx";
             var wb = XLSX.utils.book_new();
             var headerData = [
                 ["Match Key", "Material ID", "Description", "Type"]
@@ -329,8 +311,12 @@ sap.ui.define([
                 ]);
             });
 
+            // Create a shortened sheet name (max 31 chars)
+            var sheetName = selectedGroup.type + " Group";
+            sheetName = sheetName.substring(0, 31); // Ensure it doesn't exceed 31 chars
+
             var wsh = XLSX.utils.aoa_to_sheet(headerData);
-            XLSX.utils.book_append_sheet(wb, wsh, selectedKey);
+            XLSX.utils.book_append_sheet(wb, wsh, sheetName); // Use shortened name
             XLSX.writeFile(wb, filename);
             sap.ui.core.BusyIndicator.hide();
             MessageToast.show("Group data has been exported to " + filename);
@@ -344,6 +330,7 @@ sap.ui.define([
                 oRouter.navTo("CustomerListing");
             }, 1000);
         },
+
         onVendorPage: function () {
             var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
             sap.ui.core.BusyIndicator.show(0);
@@ -351,6 +338,15 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
                 oRouter.navTo("VendorListing");
             }, 1000);
+        },
+
+        formatTypeText: function (typeObj) {
+            if (typeObj.type === "All") {
+                return "All (" + this._allSuspectData.length + ")";
+            }
+            // Calculate current count (this will always be >0 due to prior filtering)
+            const filteredCount = this._allSuspectData.filter(item => item.type === typeObj.type).length;
+            return typeObj.type + " (" + filteredCount + ")";
         },
     });
 });

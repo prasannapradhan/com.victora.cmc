@@ -11,7 +11,7 @@
             <content>
                 <VBox>
                     <!-- Enhanced Toolbar -->
-                    <Toolbar 
+                    <Toolbar
                         class="sapUiSmallMarginBottom sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd"
                     >
                         <!-- Filter Dropdown -->
@@ -22,9 +22,18 @@
                             class="sapUiTinyMarginEnd"
                         >
                             <items>
-                                <core:Item key="All" text="All Vendors" />
-                                <core:Item key="National" text="National (India)" />
-                                <core:Item key="International" text="International" />
+                                <core:Item
+                                    key="All"
+                                    text="All Vendors"
+                                />
+                                <core:Item
+                                    key="National"
+                                    text="National (India)"
+                                />
+                                <core:Item
+                                    key="International"
+                                    text="International"
+                                />
                             </items>
                         </Select>
 
@@ -42,9 +51,13 @@
                             state="Warning"
                             inverted="true"
                         />
+                        <Text
+                            text="Similarity"
+                            class="sapUiTinyMarginEnd"
+                        />
                         <!-- Threshold Input -->
                         <Input
-                            width="6rem"
+                            width="4rem"
                             value="{vcfg>/threshold}"
                             type="Text"
                             change="handleVendorThresholdChange"
@@ -83,15 +96,17 @@
                             type="Emphasized"
                             class="customNavButton"
                             buttonMode="Split"
-                            >
+                        >
                             <menu>
                                 <Menu>
-                                    <MenuItem 
-                                        text="Customer" 
-                                        press="onCustomerPage"/>
-                                    <MenuItem 
-                                        text="Material" 
-                                        press="onMeterialPage"/>
+                                    <MenuItem
+                                        text="Customer"
+                                        press="onCustomerPage"
+                                    />
+                                    <MenuItem
+                                        text="Material"
+                                        press="onMeterialPage"
+                                    />
                                 </Menu>
                             </menu>
                         </MenuButton>

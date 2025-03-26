@@ -21,12 +21,12 @@
                             change="onFilterChange"
                             class="sapUiTinyMarginEnd"
                             items="{
-                                path: 'vcfg>/availableTypes',
-                                templateShareable: false
-                            }"
+                            path: 'vcfg>/availableTypes',
+                            templateShareable: false
+                        }"
                         >
                             <core:Item
-                                key="{vcfg>}"
+                                key="{vcfg>type}"
                                 text="{
                                 path: 'vcfg>',
                                 formatter: '.formatTypeText'
@@ -49,9 +49,7 @@
                         />
 
                         <!-- Threshold Input -->
-                        <Text
-                            text="Similarity"
-                        />
+                        <Text text="Similarity" />
                         <Input
                             width="4rem"
                             value="{vcfg>/threshold}"
@@ -116,15 +114,19 @@
                             width="25rem"
                             height="85vh"
                             vertical="true"
+                            class="listContainer"
                         >
                             <List
+                                id="suspectListUnique"
                                 items="{
-                                    path: 'cmc>/suspects',
-                                    templateShareable: false
-                                }"
+                                path: 'cmc>/suspects',
+                                templateShareable: false
+                            }"
                                 mode="SingleSelectMaster"
                                 selectionChange="onSelectionChange"
-                                growing="false"
+                                growing="true"
+                                growingScrollToLoad="true"
+                                growingThreshold="100"
                                 updateFinished="onListUpdateFinished"
                             >
                                 <CustomListItem>
@@ -132,7 +134,7 @@
                                         <Text
                                             text="{cmc>displayKey}"
                                             wrapping="true"
-                                            class="sapUiTinyMarginBottom"
+                                            class="sapUiTinyMarginBottom listItemText"
                                         />
                                     </VBox>
                                 </CustomListItem>
@@ -180,6 +182,13 @@
                                     <Label text="Material ID" />
                                     <table:template>
                                         <Text text="{details>Number}" />
+                                    </table:template>
+                                </table:Column>
+
+                                <table:Column width="5rem">
+                                    <Label text="Type" />
+                                    <table:template>
+                                        <Text text="{details>Type}" />
                                     </table:template>
                                 </table:Column>
                             </table:columns>

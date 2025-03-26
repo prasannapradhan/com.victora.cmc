@@ -18,9 +18,9 @@
                         <!-- Filter Dropdown -->
                         <Select
                             id="filterSelect"
-                            width="10rem"
+                            width="12rem"
                             change="onFilterChange"
-                            class="sapUiTinyMarginEnd"
+                            class="sapUiSmallMarginEnd"
                         >
                             <items>
                                 <core:Item
@@ -29,7 +29,7 @@
                                 />
                                 <core:Item
                                     key="National"
-                                    text="National"
+                                    text="National (India)"
                                 />
                                 <core:Item
                                     key="International"
@@ -40,6 +40,7 @@
 
                         <!-- Group Count -->
                         <ObjectStatus
+                            class="sapUiTinyMarginEnd"
                             text="{vcfg>/groupCountText}"
                             state="Warning"
                             inverted="true"
@@ -56,14 +57,18 @@
                         <!-- Threshold Input -->
                         <Text
                             text="Similarity"
+                            class="sapUiTinyMarginEnd"
                         />
                         <Input
                             width="4rem"
                             value="{vcfg>/threshold}"
                             type="Text"
+                            placeholder="Threshold"
+                            class="sapUiTinyMarginEnd"
                             change="handleCustomerThresholdChange"
                             textAlign="Center"
                         />
+
                         <!-- Apply Button -->
                         <Button
                             text="Apply"
@@ -76,39 +81,51 @@
                         <ToolbarSpacer />
 
                         <!-- Download All Button -->
-                        <Button
-                            icon="sap-icon://download"
-                            text="Download All"
-                            press="downloadAllCustomers"
-                            type="Emphasized"
-                        />
-                        <!-- Download Group Button -->
-                        <Button
-                            icon="sap-icon://download"
-                            text="Download Selection"
-                            press=".downloadGroupCustomers"
-                            type="Emphasized"
-                            class="sapUiTinyMarginEnd"
-                        />
-                        <!-- Option 2: Using sap.m.MenuButton (better for actions) -->
-                        <MenuButton
-                            text="GoTo"
-                            type="Emphasized"
-                            class="customNavButton"
-                            buttonMode="Split"
+                        <HBox
+                            alignItems="Center"
+                            class="sapUiResponsivePadding sapUiTinyMargin"
+                        >
+                            <!-- Download All Button -->
+                            <Button
+                                icon="sap-icon://download"
+                                text="Download All"
+                                press="downloadAllCustomers"
+                                type="Emphasized"
+                                class="sapUiSmallMarginEnd"
+                            />
+
+                            <!-- Download Group Button -->
+                            <Button
+                                icon="sap-icon://download"
+                                text="Download Selection"
+                                press=".downloadGroupCustomers"
+                                type="Emphasized"
+                                class="sapUiSmallMarginEnd"
+                            />
+
+                            <!-- Option 1: Using sap.m.Select (simpler dropdown) -->
+
+                            <!-- Option 2: Using sap.m.MenuButton (better for actions) -->
+                            <MenuButton
+                                text="GoTo"
+                                type="Emphasized"
+                                class="customNavButton"
+                                buttonMode="Split"
                             >
-                            <menu>
-                                <Menu>
-                                    <MenuItem 
-                                        text="Vendor" 
-                                        press="onCustomerPage"
+                                <menu>
+                                    <Menu>
+                                        <MenuItem
+                                            text="Vendor"
+                                            press="onCustomerPage"
                                         />
-                                    <MenuItem 
-                                        text="Material" 
-                                        press="onMeterialPage"/>
-                                </Menu>
-                            </menu>
-                        </MenuButton>
+                                        <MenuItem
+                                            text="Material"
+                                            press="onMeterialPage"
+                                        />
+                                    </Menu>
+                                </menu>
+                            </MenuButton>
+                        </HBox>
                     </Toolbar>
 
                     <!-- FlexBox for List and Table -->
