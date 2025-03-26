@@ -1,6 +1,6 @@
 _schema-version: "3.2"
 ID: victoracmc
-version: 0.0.7
+version: 0.0.8
 modules:
 - name: victoracmc-destination-content
   type: com.sap.application.content
