@@ -11,13 +11,15 @@
             <content>
                 <VBox>
                     <!-- Enhanced Toolbar -->
-                    <Toolbar class="sapUiSmallMarginBottom sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd">
+                    <Toolbar 
+                        class="sapUiSmallMarginBottom sapUiResponsivePadding sapUiTinyMarginTop sapUiTinyMarginBegin sapUiTinyMarginEnd"
+                    >
                         <!-- Filter Dropdown -->
                         <Select
                             id="vendorFilterSelect"
-                            width="12rem"
+                            width="10rem"
                             change="onFilterChange"
-                            class="sapUiSmallMarginEnd"
+                            class="sapUiTinyMarginEnd"
                         >
                             <items>
                                 <core:Item key="All" text="All Vendors" />
@@ -70,7 +72,7 @@
                             text="Download All"
                             press="downloadAllVendors"
                             type="Emphasized"
-                            class="sapUiSmallMarginEnd"
+                            class="sapUiTinyMarginEnd"
                         />
                         <!-- Download Group Button -->
                         <Button
@@ -78,7 +80,7 @@
                             text="Download Selection"
                             press=".downloadGroupVendors"
                             type="Emphasized"
-                            class="sapUiSmallMarginEnd"
+                            class="sapUiTinyMarginEnd"
                         />
                         <!-- Customer Button -->
                         <MenuButton

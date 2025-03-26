@@ -18,9 +18,9 @@
                         <!-- Filter Dropdown -->
                         <Select
                             id="filterSelect"
-                            width="12rem"
+                            width="10rem"
                             change="onFilterChange"
-                            class="sapUiSmallMarginEnd"
+                            class="sapUiTinyMarginEnd"
                         >
                             <items>
                                 <core:Item
@@ -29,7 +29,7 @@
                                 />
                                 <core:Item
                                     key="National"
-                                    text="National (India)"
+                                    text="National"
                                 />
                                 <core:Item
                                     key="International"

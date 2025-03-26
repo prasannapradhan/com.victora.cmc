@@ -17,9 +17,9 @@
                         <!-- Filter Dropdown -->
                         <Select
                             id="typeFilterSelect"
-                            width="12rem"
+                            width="10rem"
                             change="onFilterChange"
-                            class="sapUiSmallMarginEnd"
+                            class="sapUiTinyMarginEnd"
                             items="{
                                 path: 'vcfg>/availableTypes',
                                 templateShareable: false
