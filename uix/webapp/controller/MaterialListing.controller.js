@@ -60,37 +60,42 @@ sap.ui.define([
             }
         },
 
-        processMaterialData: function (materialData) {
+        processMaterialData: function(materialData) {
             sap.ui.core.BusyIndicator.show(0);
-
+            
             let materialMap = {};
             this._typeGroupCounts = {}; // Reset type group counts
-
+            
             // Initialize counters
             let totalRecords = materialData.length;
             let blankDescriptionCount = 0;
             let hashDescriptionCount = 0;
             let validRecordsCount = 0;
-
+        
             materialData.forEach(e => {
+                // Check for blank description
                 if (!e.Description || e.Description.trim().length === 0) {
                     blankDescriptionCount++;
                     return;
                 }
-
-                if (e.Description.trim() === "#") {
+                
+                // Check for descriptions with only hash symbols (one or more)
+                if (/^#+$/.test(e.Description.trim())) {
                     hashDescriptionCount++;
                     return;
                 }
-
+                
+                // Check for very short descriptions
                 if (e.Description.trim().length < 2) {
                     return;
                 }
-
+                
                 validRecordsCount++;
-
+                
+                // Clean up Description for display
                 e.Description = e.Description.replace(/[^a-zA-Z0-9]/g, " ").trim().replace(/\s+/g, " ");
-
+            
+                // Group data by Type and Description
                 if (!materialMap[e.Type]) {
                     materialMap[e.Type] = {};
                     this._typeGroupCounts[e.Type] = 0;
@@ -101,8 +106,7 @@ sap.ui.define([
                 }
                 materialMap[e.Type][e.Description].push(e);
             });
-
-
+        
             // Filter out types with 0 groups and create availableTypes array
             _cfg.availableTypes = [
                 { type: "All", count: Object.values(this._typeGroupCounts).reduce((a, b) => a + b, 0) },
@@ -114,10 +118,10 @@ sap.ui.define([
                         count: this._typeGroupCounts[type]
                     }))
             ];
-
+            
             _v.getModel("vcfg").setProperty("/availableTypes", _cfg.availableTypes);
             _v.getModel("vcfg").refresh(true);
-
+            
             this.constructSuspectMap(materialMap);
         },
 
