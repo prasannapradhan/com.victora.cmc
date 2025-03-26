@@ -40,7 +40,6 @@
 
                         <!-- Group Count -->
                         <ObjectStatus
-                            class="sapUiTinyMarginEnd"
                             text="{vcfg>/groupCountText}"
                             state="Warning"
                             inverted="true"
@@ -57,18 +56,14 @@
                         <!-- Threshold Input -->
                         <Text
                             text="Similarity"
-                            class="sapUiTinyMarginEnd"
                         />
                         <Input
                             width="4rem"
                             value="{vcfg>/threshold}"
                             type="Text"
-                            placeholder="Threshold"
-                            class="sapUiTinyMarginEnd"
                             change="handleCustomerThresholdChange"
                             textAlign="Center"
                         />
-
                         <!-- Apply Button -->
                         <Button
                             text="Apply"
