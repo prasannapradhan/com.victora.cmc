@@ -9,10 +9,12 @@ sap.ui.define([
 
     var _cref = {};
     var _v = {};
-
     var currNodeData = {};
     var __defaultSimilarity = 95;
     var _cfg = {};
+    const DB_NAME = "CustomerMasterDB";
+    const STORE_NAME = "customers";
+    const DATA_KEY = "customerData";
 
     return Controller.extend("com.victora.cmc.uix.controller.CustomerListing", {
         onInit: function () {
@@ -27,23 +29,59 @@ sap.ui.define([
             _cfg.nationalCustomerCnt = 0;
             _cfg.interNationalCustomerCnt = 0;
             _cfg.totalCustomerCnt = 0;
+            _cfg.availableFilters = ["All", "National", "International"];
 
-            _v.setModel(new JSONModel({ selectedSuspects: [], similarityThreshold: _cfg.threshold }), "details");
-            _v.setModel(new JSONModel(_cfg), "vcfg")
-            this.showCustomerListing();
+            _v.setModel(new JSONModel({ 
+                selectedSuspects: [], 
+                similarityThreshold: _cfg.threshold 
+            }), "details");
+            
+            _v.setModel(new JSONModel(_cfg), "vcfg");
+            
+            this._loadCustomerDataFromIndexedDB();
         },
 
-        showCustomerListing: async function () {
-            try {
-                let customerModel = new JSONModel();
-                await customerModel.loadData("/model/victora_customer_master.json", false);
-                let customerData = customerModel.getData();
-                GeneralUtils.removeOdataResponseMetadata(customerData);
-                this.processCustomerData(customerData.results || []);
-            } catch (error) {
-                MessageBox.error("Failed to load customer data.");
-                console.error("Error loading customer data:", error);
-            }
+        _loadCustomerDataFromIndexedDB: function() {
+            sap.ui.core.BusyIndicator.show(0);
+            
+            const request = indexedDB.open(DB_NAME, 1);
+            
+            request.onerror = (event) => {
+                console.error("IndexedDB error:", event.target.error);
+                MessageBox.error("Failed to access customer database");
+                sap.ui.core.BusyIndicator.hide();
+            };
+            
+            request.onsuccess = (event) => {
+                const db = event.target.result;
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get(DATA_KEY);
+                
+                request.onerror = (event) => {
+                    console.error("Error loading data:", event.target.error);
+                    MessageBox.error("Failed to load customer data");
+                    sap.ui.core.BusyIndicator.hide();
+                };
+                
+                request.onsuccess = (event) => {
+                    const storedData = event.target.result;
+                    if (storedData && storedData.data) {
+                        this.processCustomerData(storedData.data.results || []);
+                    } else {
+                        MessageBox.error("No customer data found in database");
+                    }
+                    sap.ui.core.BusyIndicator.hide();
+                };
+            };
+            
+            request.onupgradeneeded = (event) => {
+                // Handle database upgrades if needed
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                }
+            };
         },
 
         processCustomerData: function (customerData) {
@@ -79,7 +117,8 @@ sap.ui.define([
                     )
                 )
             );
-            _cfg.groupCountText = "Groups: " + Object.keys(_cref._allSuspectData).length;
+            
+            _cfg.groupCountText = "Groups: " + _cref._allSuspectData.length;
             _cref.processSuspectData();
             _cref.updateSuspectList("All");
         },
@@ -120,6 +159,10 @@ sap.ui.define([
                 }
                 elem.suspects = alternateSuspects;
             }
+            
+            _cfg.totalCustomerCnt = _cfg.nationalCustomerCnt + _cfg.interNationalCustomerCnt;
+            _cfg.customerCountText = "Customers: " + _cfg.totalCustomerCnt;
+            _v.getModel("vcfg").refresh(true);
         },
 
         updateSuspectList: function (filterType) {
@@ -127,19 +170,16 @@ sap.ui.define([
                 filterType === "National" ? item.country.startsWith("IN") :
                     filterType === "International" ? !item.country.startsWith("IN") : true
             );
-            _cfg.groupCountText = "Groups: " + Object.keys(filteredData).length
-            if (filterType == "National") {
-                _cfg.totalCustomerCnt = _cfg.nationalCustomerCnt;
-                _cfg.customerCountText = "Customers: " + _cfg.totalCustomerCnt;
-            } else if (filterType == "International") {
-                _cfg.totalCustomerCnt = _cfg.interNationalCustomerCnt;
-                _cfg.customerCountText = "Customers: " + _cfg.totalCustomerCnt;
-            } else {
-                _cfg.totalCustomerCnt = _cfg.nationalCustomerCnt + _cfg.interNationalCustomerCnt;
-                _cfg.customerCountText = "Customers: " + _cfg.totalCustomerCnt;
-            }
+            
+            _cfg.groupCountText = "Groups: " + filteredData.length;
+            _cfg.totalCustomerCnt = filteredData.reduce((acc, item) => acc + item.suspects.length, 0);
+            _cfg.customerCountText = "Customers: " + _cfg.totalCustomerCnt;
+            
             _v.getModel("vcfg").refresh(true);
-            _v.setModel(new JSONModel({ suspects: filteredData }), "cmc");
+            _v.setModel(new JSONModel({ 
+                suspects: filteredData,
+                selectedKey: null
+            }), "cmc");
         },
 
         onSelectionChange: function (oEvent) {
@@ -154,7 +194,7 @@ sap.ui.define([
 
         onFilterChange: function (oEvent) {
             let filterType = oEvent.getParameter("selectedItem").getKey();
-            _v.getModel("vcfg").setProperty("/filterType", filterType); // Store the filter type in the model
+            _v.getModel("vcfg").setProperty("/filterType", filterType);
             this.updateSuspectList(filterType);
         },
 
@@ -165,13 +205,23 @@ sap.ui.define([
 
         applySimilarityMatching: function () {
             sap.ui.core.BusyIndicator.show(0);
-            if (typeof currNodeData != "undefined" && (typeof currNodeData.suspects != "undefined")) {
-                var suspects = currNodeData.suspects;
-                _v.getModel("details").setProperty("/selectedSuspects", suspects);
-                sap.ui.core.BusyIndicator.hide();
+            if (currNodeData?.suspects) {
+                _v.getModel("details").setProperty("/selectedSuspects", currNodeData.suspects);
             }
             sap.ui.core.BusyIndicator.hide();
             _v.getModel("vcfg").refresh(true);
+        },
+
+        refreshData: function() {
+            sap.ui.core.BusyIndicator.show(0);
+            
+            // Clear the existing data
+            this._allSuspectData = [];
+            _cfg.nationalCustomerCnt = 0;
+            _cfg.interNationalCustomerCnt = 0;
+            
+            // Reload from IndexedDB
+            this._loadCustomerDataFromIndexedDB();
         },
 
         downloadAllCustomers: function () {

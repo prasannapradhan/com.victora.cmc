@@ -13,17 +13,18 @@ sap.ui.define([
     var currNodeData = {};
     var __defaultSimilarity = 95;
     var _cfg = {};
+    const DB_NAME = "MaterialMasterDB";
+    const STORE_NAME = "materials";
+    const DATA_KEY = "materialData";
 
     return Controller.extend("com.victora.cmc.uix.controller.MaterialListing", {
         onInit: function () {
             _cref = this;
             _v = this.getView();
 
-            sap.ui.core.BusyIndicator.show(0);
-
             this._allSuspectData = [];
-            this._typeGroupCounts = {}; // Store original type group counts
-            this._currentFilteredCount = 0; // Store current filtered count
+            this._typeGroupCounts = {};
+            this._currentFilteredCount = 0;
 
             _cfg.threshold = __defaultSimilarity;
             _cfg.groupCountText = "";
@@ -38,64 +39,78 @@ sap.ui.define([
 
             _v.setModel(new JSONModel(_cfg), "vcfg");
 
-            this.showMaterialListing();
+            this._loadMaterialDataFromIndexedDB();
         },
 
-        showMaterialListing: async function () {
-            try {
-                let materialModel = new JSONModel();
-                sap.ui.core.BusyIndicator.show(0);
-
-                await materialModel.loadData("/model/victora_material_master.json", false);
-                let materialData = materialModel.getData();
-                GeneralUtils.removeOdataResponseMetadata(materialData);
-
-                this.processMaterialData(materialData.results || []);
-
+        _loadMaterialDataFromIndexedDB: function() {
+            sap.ui.core.BusyIndicator.show(0);
+            
+            const request = indexedDB.open(DB_NAME, 1);
+            
+            request.onerror = (event) => {
+                console.error("IndexedDB error:", event.target.error);
+                MessageBox.error("Failed to access material database");
                 sap.ui.core.BusyIndicator.hide();
-            } catch (error) {
-                sap.ui.core.BusyIndicator.hide();
-                MessageBox.error("Failed to load material data.");
-                console.error("Error loading material data:", error);
-            }
+            };
+            
+            request.onsuccess = (event) => {
+                const db = event.target.result;
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get(DATA_KEY);
+                
+                request.onerror = (event) => {
+                    console.error("Error loading data:", event.target.error);
+                    MessageBox.error("Failed to load material data");
+                    sap.ui.core.BusyIndicator.hide();
+                };
+                
+                request.onsuccess = (event) => {
+                    const storedData = event.target.result;
+                    if (storedData && storedData.data) {
+                        this.processMaterialData(storedData.data.results || []);
+                    } else {
+                        MessageBox.error("No material data found in database");
+                    }
+                    sap.ui.core.BusyIndicator.hide();
+                };
+            };
+            
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                }
+            };
         },
 
         processMaterialData: function(materialData) {
-            sap.ui.core.BusyIndicator.show(0);
-            
             let materialMap = {};
-            this._typeGroupCounts = {}; // Reset type group counts
+            this._typeGroupCounts = {};
             
-            // Initialize counters
             let totalRecords = materialData.length;
             let blankDescriptionCount = 0;
             let hashDescriptionCount = 0;
             let validRecordsCount = 0;
         
             materialData.forEach(e => {
-                // Check for blank description
                 if (!e.Description || e.Description.trim().length === 0) {
                     blankDescriptionCount++;
                     return;
                 }
                 
-                // Check for descriptions with only hash symbols (one or more)
                 if (/^#+$/.test(e.Description.trim())) {
                     hashDescriptionCount++;
                     return;
                 }
                 
-                // Check for very short descriptions
                 if (e.Description.trim().length < 2) {
                     return;
                 }
                 
                 validRecordsCount++;
-                
-                // Clean up Description for display
                 e.Description = e.Description.replace(/[^a-zA-Z0-9]/g, " ").trim().replace(/\s+/g, " ");
             
-                // Group data by Type and Description
                 if (!materialMap[e.Type]) {
                     materialMap[e.Type] = {};
                     this._typeGroupCounts[e.Type] = 0;
@@ -107,11 +122,10 @@ sap.ui.define([
                 materialMap[e.Type][e.Description].push(e);
             });
         
-            // Filter out types with 0 groups and create availableTypes array
             _cfg.availableTypes = [
                 { type: "All", count: Object.values(this._typeGroupCounts).reduce((a, b) => a + b, 0) },
                 ...Object.keys(this._typeGroupCounts)
-                    .filter(type => this._typeGroupCounts[type] > 0) // Only include types with groups
+                    .filter(type => this._typeGroupCounts[type] > 0)
                     .sort()
                     .map(type => ({
                         type: type,
@@ -219,31 +233,36 @@ sap.ui.define([
 
         applySimilarityMatching: function () {
             sap.ui.core.BusyIndicator.show(0);
-            if (typeof currNodeData != "undefined" && (typeof currNodeData.suspects != "undefined")) {
-                var suspects = currNodeData.suspects;
-                _v.getModel("details").setProperty("/selectedSuspects", suspects);
-                sap.ui.core.BusyIndicator.hide();
+            if (currNodeData?.suspects) {
+                _v.getModel("details").setProperty("/selectedSuspects", currNodeData.suspects);
             }
             sap.ui.core.BusyIndicator.hide();
             _v.getModel("vcfg").refresh(true);
+        },
+
+        refreshData: function() {
+            sap.ui.core.BusyIndicator.show(0);
+            this._allSuspectData = [];
+            _cfg.totalMaterialCnt = 0;
+            this._loadMaterialDataFromIndexedDB();
         },
 
         downloadAllMaterials: function () {
             sap.ui.core.BusyIndicator.show(0);
             let allData = [];
             let filterType = _v.getModel("vcfg").getProperty("/filterType") || "All";
+            
             this._allSuspectData.forEach(group => {
                 if (filterType === "All" || group.type === filterType) {
                     group.suspects.forEach(suspect => {
-                        let data = {
+                        allData.push({
                             "Key": group.key,
                             "Type": group.type,
                             "Match Key": suspect.MatchGroup || "N/A",
                             "Description": suspect.Description,
                             "Material ID": suspect.Number,
                             "Name": suspect.Name
-                        };
-                        allData.push(data);
+                        });
                     });
                 }
             });
@@ -253,6 +272,7 @@ sap.ui.define([
             var headerData = [
                 ["Key", "Match Key", "Material ID", "Description", "Type"]
             ];
+            
             allData.forEach(item => {
                 headerData.push([
                     item["Key"],
@@ -290,15 +310,14 @@ sap.ui.define([
 
             let groupData = [];
             selectedGroup.suspects.forEach(suspect => {
-                let data = {
+                groupData.push({
                     "Key": selectedGroup.key,
                     "Type": selectedGroup.type,
                     "Match Key": suspect.MatchGroup || "N/A",
                     "Description": suspect.Description,
                     "Material ID": suspect.Number,
                     "Name": suspect.Name
-                };
-                groupData.push(data);
+                });
             });
 
             var filename = "material-group-export.xlsx";
@@ -306,6 +325,7 @@ sap.ui.define([
             var headerData = [
                 ["Match Key", "Material ID", "Description", "Type"]
             ];
+            
             groupData.forEach(item => {
                 headerData.push([
                     item["Match Key"],
@@ -315,12 +335,11 @@ sap.ui.define([
                 ]);
             });
 
-            // Create a shortened sheet name (max 31 chars)
             var sheetName = selectedGroup.type + " Group";
-            sheetName = sheetName.substring(0, 31); // Ensure it doesn't exceed 31 chars
+            sheetName = sheetName.substring(0, 31);
 
             var wsh = XLSX.utils.aoa_to_sheet(headerData);
-            XLSX.utils.book_append_sheet(wb, wsh, sheetName); // Use shortened name
+            XLSX.utils.book_append_sheet(wb, wsh, sheetName);
             XLSX.writeFile(wb, filename);
             sap.ui.core.BusyIndicator.hide();
             MessageToast.show("Group data has been exported to " + filename);
@@ -348,9 +367,8 @@ sap.ui.define([
             if (typeObj.type === "All") {
                 return "All (" + this._allSuspectData.length + ")";
             }
-            // Calculate current count (this will always be >0 due to prior filtering)
             const filteredCount = this._allSuspectData.filter(item => item.type === typeObj.type).length;
             return typeObj.type + " (" + filteredCount + ")";
-        },
+        }
     });
 });

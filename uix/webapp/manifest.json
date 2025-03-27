@@ -71,6 +71,12 @@
         "clearTarget" : "true"
       },
       "routes": [
+
+        {
+          "pattern": "",
+          "name": "InitialLoader",
+          "target": "InitialLoader"
+      },
         {
           "name": "CustomerListing",
           "pattern": "CustomerListing",
@@ -94,6 +100,14 @@
         }
       ],
     "targets": {
+  "InitialLoader": {
+    "viewType": "XML",
+    "transition": "slide",
+    "clearControlAggregation": true,
+    "viewId": "InitialLoader",
+    "viewName": "InitialLoader"
+  },
+
   "TargetcustomerListing": {
     "viewType": "XML",
     "transition": "slide",

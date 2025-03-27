@@ -105,7 +105,7 @@
                                     />
                                     <MenuItem
                                         text="Material"
-                                        press="onMeterialPage"
+                                        press="onMaterialPage"
                                     />
                                 </Menu>
                             </menu>

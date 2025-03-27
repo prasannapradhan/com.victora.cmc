@@ -1,0 +1,68 @@
+<mvc:View
+    controllerName="com.victora.cmc.uix.controller.InitialLoader"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    displayBlock="true"
+    height="100%">
+    
+    <Page 
+        title="Loading Application Data"
+        showHeader="true"
+        enableScrolling="false"
+        class="sapUiContentPadding">
+        
+        <content>
+            <VBox
+                justifyContent="Center"
+                alignItems="Center"
+                width="100%"
+                height="100%">
+                
+                <BusyIndicator 
+                    size="3rem"
+                    class="sapUiMediumMargin"
+                    visible="{loader>/loading}"/>
+                    
+                <Text 
+                    text="{loader>/progress}"
+                    class="sapUiSmallMargin"
+                    textAlign="Center"
+                    width="100%"/>
+                    
+                <ProgressIndicator 
+                    width="80%"
+                    displayValue="Loading data... {loader>/currentStep} of {loader>/totalSteps} completed"
+                    showValue="true"
+                    state="None"
+                    percentValue="{loader>/totalProgress}"
+                    class="sapUiSmallMargin"/>
+                
+                <HBox justifyContent="Center" class="sapUiSmallMargin">
+                    <ObjectStatus
+                        title="Customers"
+                        icon="sap-icon://customer"
+                        state="{= ${loader>/customerLoaded} ? 'Success' : 'None' }"
+                        class="sapUiSmallMarginEnd"/>
+                    
+                    <ObjectStatus
+                        title="Materials"
+                        icon="sap-icon://product"
+                        state="{= ${loader>/materialLoaded} ? 'Success' : 'None' }"
+                        class="sapUiSmallMargin"/>
+                    
+                    <ObjectStatus
+                        title="Vendors"
+                        icon="sap-icon://supplier"
+                        state="{= ${loader>/vendorLoaded} ? 'Success' : 'None' }"
+                        class="sapUiSmallMarginBegin"/>
+                </HBox>
+                
+                <Text 
+                    text="All data loaded successfully. Starting application..."
+                    visible="{= ${loader>/customerLoaded} &amp;&amp; ${loader>/materialLoaded} &amp;&amp; ${loader>/vendorLoaded} }"
+                    class="sapUiSmallMargin successText"/>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>

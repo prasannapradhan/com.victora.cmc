@@ -12,6 +12,9 @@ sap.ui.define([
     var currNodeData = {};
     var __defaultSimilarity = 95;
     var _cfg = {};
+    const DB_NAME = "VendorMasterDB";
+    const STORE_NAME = "vendors";
+    const DATA_KEY = "vendorData";
 
     return Controller.extend("com.victora.cmc.uix.controller.VendorListing", {
         onInit: function () {
@@ -26,23 +29,58 @@ sap.ui.define([
             _cfg.nationalVendorCnt = 0;
             _cfg.interNationalVendorCnt = 0;
             _cfg.totalVendorCnt = 0;
+            _cfg.availableFilters = ["All", "National", "International"];
 
-            _v.setModel(new JSONModel({ selectedSuspects: [], similarityThreshold: _cfg.threshold }), "details");
+            _v.setModel(new JSONModel({ 
+                selectedSuspects: [], 
+                similarityThreshold: _cfg.threshold 
+            }), "details");
+            
             _v.setModel(new JSONModel(_cfg), "vcfg");
-            this.showVendorListing();
+            
+            this._loadVendorDataFromIndexedDB();
         },
 
-        showVendorListing: async function () {
-            try {
-                let vendorModel = new JSONModel();
-                await vendorModel.loadData("/model/victora_vendor_master.json", false);
-                let vendorData = vendorModel.getData();
-                GeneralUtils.removeOdataResponseMetadata(vendorData);
-                this.processVendorData(vendorData.results || []);
-            } catch (error) {
-                MessageBox.error("Failed to load vendor data.");
-                console.error("Error loading vendor data:", error);
-            }
+        _loadVendorDataFromIndexedDB: function() {
+            sap.ui.core.BusyIndicator.show(0);
+            
+            const request = indexedDB.open(DB_NAME, 1);
+            
+            request.onerror = (event) => {
+                console.error("IndexedDB error:", event.target.error);
+                MessageBox.error("Failed to access vendor database");
+                sap.ui.core.BusyIndicator.hide();
+            };
+            
+            request.onsuccess = (event) => {
+                const db = event.target.result;
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get(DATA_KEY);
+                
+                request.onerror = (event) => {
+                    console.error("Error loading data:", event.target.error);
+                    MessageBox.error("Failed to load vendor data");
+                    sap.ui.core.BusyIndicator.hide();
+                };
+                
+                request.onsuccess = (event) => {
+                    const storedData = event.target.result;
+                    if (storedData && storedData.data) {
+                        this.processVendorData(storedData.data.results || []);
+                    } else {
+                        MessageBox.error("No vendor data found in database");
+                    }
+                    sap.ui.core.BusyIndicator.hide();
+                };
+            };
+            
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                }
+            };
         },
 
         processVendorData: function (vendorData) {
@@ -78,7 +116,8 @@ sap.ui.define([
                     )
                 )
             );
-            _cfg.groupCountText = "Groups: " + Object.keys(_cref._allSuspectData).length;
+            
+            _cfg.groupCountText = "Groups: " + _cref._allSuspectData.length;
             _cref.processSuspectData();
             _cref.updateSuspectList("All");
         },
@@ -119,6 +158,10 @@ sap.ui.define([
                 }
                 elem.suspects = alternateSuspects;
             }
+            
+            _cfg.totalVendorCnt = _cfg.nationalVendorCnt + _cfg.interNationalVendorCnt;
+            _cfg.vendorCountText = "Vendors: " + _cfg.totalVendorCnt;
+            _v.getModel("vcfg").refresh(true);
         },
 
         updateSuspectList: function (filterType) {
@@ -126,20 +169,18 @@ sap.ui.define([
                 filterType === "National" ? item.country.startsWith("IN") :
                     filterType === "International" ? !item.country.startsWith("IN") : true
             );
-            _cfg.groupCountText = "Groups: " + Object.keys(filteredData).length;
-            if (filterType == "National") {
-                _cfg.totalVendorCnt = _cfg.nationalVendorCnt;
-                _cfg.vendorCountText = "Vendors: " + _cfg.totalVendorCnt;
-            } else if (filterType == "International") {
-                _cfg.totalVendorCnt = _cfg.interNationalVendorCnt;
-                _cfg.vendorCountText = "Vendors: " + _cfg.totalVendorCnt;
-            } else {
-                _cfg.totalVendorCnt = _cfg.nationalVendorCnt + _cfg.interNationalVendorCnt;
-                _cfg.vendorCountText = "Vendors: " + _cfg.totalVendorCnt;
-            }
+            
+            _cfg.groupCountText = "Groups: " + filteredData.length;
+            _cfg.totalVendorCnt = filteredData.reduce((acc, item) => acc + item.suspects.length, 0);
+            _cfg.vendorCountText = "Vendors: " + _cfg.totalVendorCnt;
+            
             _v.getModel("vcfg").refresh(true);
-            _v.setModel(new JSONModel({ suspects: filteredData }), "cmc");
+            _v.setModel(new JSONModel({ 
+                suspects: filteredData,
+                selectedKey: null
+            }), "cmc");
         },
+
         onSelectionChange: function (oEvent) {
             let sKey = oEvent.getParameter("listItem").getBindingContext("cmc").getProperty("key");
             _v.getModel("cmc").setProperty("/selectedKey", sKey);
@@ -152,7 +193,7 @@ sap.ui.define([
 
         onFilterChange: function (oEvent) {
             let filterType = oEvent.getParameter("selectedItem").getKey();
-            _v.getModel("vcfg").setProperty("/filterType", filterType); // Store the filter type in the model
+            _v.getModel("vcfg").setProperty("/filterType", filterType);
             this.updateSuspectList(filterType);
         },
 
@@ -163,79 +204,52 @@ sap.ui.define([
 
         applySimilarityMatching: function () {
             sap.ui.core.BusyIndicator.show(0);
-            if (typeof currNodeData != "undefined" && (typeof currNodeData.suspects != "undefined")) {
-                var suspects = currNodeData.suspects;
-                _v.getModel("details").setProperty("/selectedSuspects", suspects);
-                sap.ui.core.BusyIndicator.hide();
+            if (currNodeData?.suspects) {
+                _v.getModel("details").setProperty("/selectedSuspects", currNodeData.suspects);
             }
             sap.ui.core.BusyIndicator.hide();
             _v.getModel("vcfg").refresh(true);
         },
 
-        onCustomerPage: function () {
-            var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+        refreshData: function() {
             sap.ui.core.BusyIndicator.show(0);
-            setTimeout(function () {
-                sap.ui.core.BusyIndicator.hide();
-                oRouter.navTo("CustomerListing");
-            }, 1000);
-        },
-
-        onMeterialPage: function () {
-            var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
-            var oView = this.getView();
-
-            sap.ui.core.BusyIndicator.show(0);
-
-            setTimeout(function () {
-                sap.ui.core.BusyIndicator.hide();
-                oRouter.navTo("MaterialListing");
-            }, 1000);
+            this._allSuspectData = [];
+            _cfg.nationalVendorCnt = 0;
+            _cfg.interNationalVendorCnt = 0;
+            this._loadVendorDataFromIndexedDB();
         },
 
         downloadAllVendors: function () {
-            // Show Busy Indicator
             sap.ui.core.BusyIndicator.show(0);
-
-            // Simulate a delay for testing
             let allData = [];
-            let filterType = _v.getModel("vcfg").getProperty("/filterType") || "All"; // Default to "All" if not set
+            let filterType = _v.getModel("vcfg").getProperty("/filterType") || "All";
+            
             this._allSuspectData.forEach(group => {
-                if (
-                    filterType === "All" ||
+                if (filterType === "All" || 
                     (filterType === "National" && group.country.startsWith("IN")) ||
-                    (filterType === "International" && !group.country.startsWith("IN"))
-                ) {
-                    // Process and log the data
+                    (filterType === "International" && !group.country.startsWith("IN"))) {
                     group.suspects.forEach(suspect => {
-                        let data = {
+                        allData.push({
                             "Key": group.key,
                             "Country": group.country,
-                            "Tax ID": suspect.TaxId,
-                            "Pincode": suspect.Pincode,
-                            "Match Key": suspect.MatchGroup || "N/A", // Use MatchGroup if available, otherwise "N/A"
+                            "Match Key": suspect.MatchGroup || "N/A",
                             "Address": suspect.Address,
                             "Vendor ID": suspect.VendorId,
                             "Name": suspect.Name,
+                            "Tax ID": suspect.TaxId,
+                            "Pincode": suspect.Pincode,
                             "Region": suspect.Region
-                        };
-                        allData.push(data);
+                        });
                     });
                 }
             });
 
-            // Define the filename
             var filename = "Vendor_data-Export.xlsx";
-
-            // Create a new workbook
             var wb = XLSX.utils.book_new();
-
-            // Define the header data
             var headerData = [
                 ["Key", "Match Key", "Vendor ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
             ];
-
-            // Add the data rows to the headerData array
+            
             allData.forEach(item => {
                 headerData.push([
                     item["Key"],
@@ -250,24 +264,15 @@ sap.ui.define([
                 ]);
             });
 
-            // Convert the headerData array to a worksheet
             var wsh = XLSX.utils.aoa_to_sheet(headerData);
-
-            // Append the worksheet to the workbook
             XLSX.utils.book_append_sheet(wb, wsh, 'vendor-duplicates');
-
-            // Export the workbook to an Excel file
             XLSX.writeFile(wb, filename);
-
-            // Hide Busy Indicator after download is complete
             sap.ui.core.BusyIndicator.hide();
-
             MessageToast.show(`Vendor data (${filterType}) has been exported to ${filename}`);
         },
 
         downloadGroupVendors: function () {
             sap.ui.core.BusyIndicator.show(0);
-            // Get the selected key from the table (assuming it's stored in the model)
             let selectedKey = _v.getModel("cmc").getProperty("/selectedKey");
 
             if (!selectedKey) {
@@ -276,7 +281,6 @@ sap.ui.define([
                 return;
             }
 
-            // Find the group data for the selected key
             let selectedGroup = this._allSuspectData.find(group => group.key === selectedKey);
 
             if (!selectedGroup) {
@@ -285,33 +289,27 @@ sap.ui.define([
                 return;
             }
 
-            // Prepare the data for the selected group
             let groupData = [];
             selectedGroup.suspects.forEach(suspect => {
-                let data = {
+                groupData.push({
                     "Key": selectedGroup.key,
                     "Country": selectedGroup.country,
-                    "Tax ID": suspect.TaxId,
-                    "Pincode": suspect.Pincode,
                     "Match Key": suspect.MatchGroup || "N/A",
                     "Address": suspect.Address,
                     "Vendor ID": suspect.VendorId,
                     "Name": suspect.Name,
+                    "Tax ID": suspect.TaxId,
+                    "Pincode": suspect.Pincode,
                     "Region": suspect.Region
-                };
-                groupData.push(data);
+                });
             });
 
-            // Define the filename
-            var filename = "vendor-duplicate-group-export.xlsx";
-
-            // Create a new workbook
+            var filename = "vendor-group-export.xlsx";
             var wb = XLSX.utils.book_new();
-            // Define the header data
             var headerData = [
                 ["Match Key", "Vendor ID", "Name", "Address", "Country", "Tax ID", "Pincode", "Region"]
             ];
-            // Add the data rows to the headerData array
+            
             groupData.forEach(item => {
                 headerData.push([
                     item["Match Key"],
@@ -326,16 +324,28 @@ sap.ui.define([
             });
 
             var wsh = XLSX.utils.aoa_to_sheet(headerData);
-
-            // Append the worksheet to the workbook
             XLSX.utils.book_append_sheet(wb, wsh, selectedKey);
-
-            // Export the workbook to an Excel file
             XLSX.writeFile(wb, filename);
             sap.ui.core.BusyIndicator.hide();
-
             MessageToast.show("Group data has been exported to " + filename);
         },
 
+        onCustomerPage: function () {
+            var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+            sap.ui.core.BusyIndicator.show(0);
+            setTimeout(function () {
+                sap.ui.core.BusyIndicator.hide();
+                oRouter.navTo("CustomerListing");
+            }, 1000);
+        },
+
+        onMaterialPage: function () {
+            var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+            sap.ui.core.BusyIndicator.show(0);
+            setTimeout(function () {
+                sap.ui.core.BusyIndicator.hide();
+                oRouter.navTo("MaterialListing");
+            }, 1000);
+        }
     });
 });
